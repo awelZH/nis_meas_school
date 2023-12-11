@@ -14,7 +14,7 @@
 ## (nur ändern, wenn du sicher bist)
 path_to_rohdaten_file = 'data/rohdaten_messwerte.csv'
 art_der_aggregation = 'center'
-path_to_aufbereitem_file = 'data/aufbereite_messwerte.csv'
+path_to_aufbereitem_file = 'data/aufbereitete_messwerte.csv'
 path_to_schwellenwerte = 'data/schwellenwerte.csv'
 path_to_messorte_file = 'data/messorte.csv'
 #path_to_schwellenwerte_github = 'https://github.com/awelZH/nis_meas_school/blob/8ed4362b4c72e4e51113e541d75ebc4e16f280dd/data/frequenzbaender_schwellenwerte.csv'
