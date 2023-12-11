@@ -7,7 +7,7 @@ If you want to update the OGD data with the newest data (difference load) please
 
 In the folder [scripts](scripts), you will find additional scripts for different purposes:
 
-## load_all_data.R
+### load_all_data.R
 Load all data available (full load) and generate a refined dataframe, where all measurement data is available. This dataset is saved to [data/aufbereitete_messwerte.csv](aufbereitete_messwerte.csv)
 Note: The caluclations are not done in this script and if you want to to the yearly update, use the script [main.R](main.R).
 
