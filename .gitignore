@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data/aufbereitete_messwerte.csv
+data/rohdaten_messwerte.csv
+data/messorte.csv
