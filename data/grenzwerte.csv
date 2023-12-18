@@ -1,0 +1,3 @@
+service,grenzwert,einheit_kurz,einheit_lang,gueltig_von,gueltig_bis
+Rundfunk,3,V/m",Volt pro Meter,1900-01-01,NA
+Mobilfunk,5,V/m",Volt pro Meter,1900-01-01,NA
