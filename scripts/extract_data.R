@@ -8,8 +8,10 @@ library(janitor)
 library(readr)
 library(vctrs)
 library(dplyr)
+library(fs)
+library(data.table)
 
-# define functions
+# extract file paths to csv for Einzeldaten
 extract_csv_paths_einzel <- function(top_folder_path, num_dirs = Inf) {
   daten_dirs <- fs::dir_ls(top_folder_path, recurse = TRUE, glob = "*Daten") %>%
     head(num_dirs)
@@ -19,6 +21,10 @@ extract_csv_paths_einzel <- function(top_folder_path, num_dirs = Inf) {
     return(NULL)
   }
 
+  # Counters
+  total_folders <- length(daten_dirs)
+  counter <- 1
+
   paths_list <- map(daten_dirs, function(dir) {
     subfolders <- fs::dir_ls(dir, type = "directory")
     csv_files <- if (length(subfolders) > 0) {
@@ -27,12 +33,19 @@ extract_csv_paths_einzel <- function(top_folder_path, num_dirs = Inf) {
       fs::dir_ls(dir, glob = "*.csv")
     }
 
-    list(csv_files = csv_files, messort_code = str_extract(dir, "\\d+_Daten"))
+    messort_code <- str_extract(dir, "\\d+_Daten")
+
+    # Print the current progress with messort_code
+    cat(sprintf("Processing 'Messort': %s (%d out of %d)\n", messort_code, counter, total_folders))
+    counter <<- counter + 1
+
+    list(csv_files = csv_files, messort_code = messort_code)
   })
 
   names(paths_list) <- map_chr(daten_dirs, ~ str_extract(.x, "\\d+_Daten"))
   return(paths_list)
 }
+
 
 
 # extract langzeit paths
@@ -70,7 +83,7 @@ extract_csv_paths_langzeit <- function(top_folder_path, num_dirs = Inf) {
 
 
 # Function to filter out HEADER CSV files
-filter_csv_files <- function(paths_list) {
+filter_csv_files_einzel <- function(paths_list) {
   map(cli_progress_along(paths_list), function(i) {
     folder_info <- paths_list[[i]]
     folder_info$csv_files <- folder_info$csv_files %>%
@@ -79,19 +92,36 @@ filter_csv_files <- function(paths_list) {
   })
 }
 
+filter_csv_files_langzeit <- function(paths_list) {
+  # Helper function to filter out HEADER CSV files
+  filter_header_csv <- function(csv_files) {
+    csv_files[!grepl("_HEADER\\.csv$", csv_files)]
+  }
 
-# Get the paths of CSV files
-top_folder_path <- "Schulhausmessungen"
-csv_paths_list_2 <- extract_csv_paths(top_folder_path, num_dirs = )
+  # Function to process each directory at the year level
+  process_directory <- function(directory) {
+    directory$csv_files <- filter_header_csv(directory$csv_files)
+    directory
+  }
 
-csv_paths_list_5 <- extract_csv_paths(top_folder_path, num_dirs = 5)
+  # Function to process each year within a 'Messort'
+  process_year <- function(year) {
+    map(year, process_directory)
+  }
 
-csv_paths_list_all <- extract_csv_paths(top_folder_path, num_dirs = Inf)
+  # Function to process each 'Messort'
+  process_messort <- function(messort) {
+    map(messort, process_year)
+  }
+
+  map(paths_list, process_messort)
+}
 
 
 
-# processing the data
-process_csv_data <- function(filtered_paths_list) {
+
+# processing the data for Einzeldaten
+process_csv_data_einzel <- function(filtered_paths_list) {
   total_folders <- length(filtered_paths_list)
   counter <- 1
 
@@ -124,29 +154,85 @@ process_csv_data <- function(filtered_paths_list) {
     processed_files
   })
 }
-# Example usage
 
-measurements_data <- process_csv_data(csv_paths_list_5)
+# function to process langzeit data
+process_csv_data_langzeit <- function(filtered_paths_list) {
+  total_messorte <- length(filtered_paths_list)
+  messort_counter <- 1
 
-measurements_data_all <- process_csv_data(csv_paths_list_all)
+  process_files <- function(files, messort_code) {
+    map(cli_progress_along(files), function(i) {
+      file <- files[[i]]
+      file_contents <- fread(file = file, skip = "Fmin [Hz]") %>%
+        clean_names()
 
+      # Read the first 10 lines to extract date and time
+      timestamp <- file %>%
+        read_lines(n_max = 10) %>%
+        str_extract(pattern = "(?<=Time;|Date;)[^;]+") %>%
+        discard(is.na) %>%
+        str_flatten(collapse = "T")
 
-# save results
-
-saveRDS(object = measurements_data_all, file = "Einzelmessungen_raw_list.RDS")
-
-
-# flatten list
-
-measurements_data_all_modified <- map(measurements_data_all, ~{
-  if ("value_v_m_2" %in% names(.x)) {
-    .x %>%
-      mutate(
-        value_v_m = coalesce(value_v_m, value_v_m_2)
-      )
-  } else {
-    .x
+      file_contents %>%
+        mutate(Zeitstempel = timestamp, Messort_Code = messort_code) %>%
+        select(-v1) %>%
+        mutate(Messort_Code = str_extract(Messort_Code, "[[:digit:]]+"))
+    }) %>% list_rbind()
   }
-}, .progress = TRUE)
+
+  processed_data <- map2(filtered_paths_list, names(filtered_paths_list), function(years_list, messort_code) {
+    cat(sprintf("Processing 'Messort' %d out of %d: %s\n", messort_counter, total_messorte, messort_code))
+
+    messort_processed_files <- map2(years_list, names(years_list), function(year_info, year) {
+      map2(year_info, names(year_info), function(dir_info, dir) {
+        csv_files <- dir_info$csv_files
+        process_files(csv_files, messort_code)
+      })
+    })
+
+    messort_counter <<- messort_counter + 1
+    messort_processed_files
+  })
+
+  return(processed_data)
+}
 
 
+# check for NA Einzeldaten
+check_na_einzelmessungen <- function(einzelmessungen_list) {
+  na_containing_dfs <- map(einzelmessungen_list, \(df, name) {
+    if (any(is.na(df$value_v_m))) {
+      return(name)
+    }
+    NULL
+  }, name = names(einzelmessungen_list)) %>%
+    compact() %>%
+    unlist()
+
+  return(na_containing_dfs)
+}
+
+
+# check for NA Langzeitmessungen
+check_na_langzeitmessungen <- function(langzeitmessungen_list) {
+  na_containing_paths <- c()
+
+  for (messort_name in names(langzeitmessungen_list)) {
+    messort_list <- langzeitmessungen_list[[messort_name]]
+
+    for (year_name in names(messort_list)) {
+      year_list <- messort_list[[year_name]]
+
+      for (dir_name in names(year_list)) {
+        df <- year_list[[dir_name]]
+
+        if (any(is.na(df$value_v_m))) {
+          path <- paste(messort_name, year_name, dir_name, sep = "/")
+          na_containing_paths <- c(na_containing_paths, path)
+        }
+      }
+    }
+  }
+
+  return(na_containing_paths)
+}
