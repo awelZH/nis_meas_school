@@ -1,41 +1,37 @@
-# Kurbeschreibung:
-## Dieses Skript eignet sich um die Berechnung der Werte, welche später für die Visualisierung gebraucht werden, durchzuführen
-
-# 1. Packages und Daten laden
-# 2. Bereinigung der Datum Spalten & Schwellerenwerte-Bereinigung. Allen Messwerten wird die Korrekur abgezogen. Werte <0 werden mit 0 ersetzt.
-# 3. Rollierende Mittelwert über eine 6 min Messung wird gemacht. Dadurch resultieren 240 Messwerte pro Service, Messort und Jahr. Pro 240 Werte wird der maximale Wert bestimmt.
-# Dadurch hat man pro Messort, Jahr und Service genau einen Wert.
-# 4. Dataframe wird als csv abgespeichert
-
-# Voraussetzungen:
+#' Erstelle Werte für die Visualisierung der Immissionsmessungen NIS im Kanton Zürich als OGD
 ## Als Input braucht das Skript das File 'rohdaten_messwerte.csv'
-## ----------------------------------------------------------------------------------------------------------------
+#'
+#' @param path_rohdaten_messwerte Datenpfad als String zum Rohdaten File. Dieses File wird in dieser Funktion im MDV hochgeladen
+#' @param url_schwellenwerte URL zum Schwellenwert File als String
+#' @param url_messorte URL zum Messorte OGD File als String
+#' @param type_rolling_mean Art wie der Rolling mean berechnet wird als String.
+#' @param rolling_mean_breite numeric, Breite des Rolling means
+#' @param Einheit_kurz Einheit der zu darzustellenden Werte (SI Einheiten) als String
+#' @param Einheit_lang Einheit der zu darzustellenden Werte (ausgeschrieben) als String
+#' @param path_aufbereitetem_file Datenpfad als String zum Aufbereiteten File. Dieses File wird in dieser Funktion im MDV hochgeladen
+#' @examples transform(path_rohdaten_messwerte = "data/temp/rohdaten_messwerte.zip", url_schwellenwerte <- 'https://raw.githubusercontent.com/awelZH/nis_meas_school/0ccd1a18257f2debd9f791530eb646d38761446a/data/frequenzbaender_schwellenwerte.csv', url_messorte = 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv', type_rolling_mean = 'center' # Wie der Rolling mean berechnet wird, rolling_mean_breite = 60 # Wie viele Werte pro Wert im rolling mean berücksichtigt werden, Einheit_kurz = "V/m", Einheit_lang = "Volt pro Meter", path_aufbereitem_file = 'data/temp/aufbereitete_messwerte.csv')
 
-# Parameter:
-## (nur ändern, wenn du sicher bist)
-path_to_aufbereitem_file = '~/file-server/file-server/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/aufbereitete_messwerte.csv'
-path_rohdaten_messwerte = "~/file-server/file-server/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/rohdaten_messwerte.zip"
-url_to_schwellewerte <- 'https://raw.githubusercontent.com/awelZH/nis_meas_school/0ccd1a18257f2debd9f791530eb646d38761446a/data/frequenzbaender_schwellenwerte.csv'
-path_to_messorte_file = 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv'
-art_der_aggregation = 'center' # Wie der Rolling mean berechnet wird
-rolling_mean_breite = 60 # Wie viele Werte pro Wert im rolling mean berücksichtigt werden
-Einheit_kurz = "V/m"
-Einheit_lang = "Volt pro Meter"
+transform <- function(path_rohdaten_messwerte, url_schwellenwerte, url_messorte, type_rolling_mean, rolling_mean_breite, Einheit_kurz, Einheit_lang, path_aufbereitetem_file){
 
-##---------------------------------------------------------------------------
+  # Überprüfe, ob die Argumente der Funktion sind im richtigen Datenformat. Ansonsten breche ab und werfe Fehlermeldung
+  stopifnot("`path_rohdaten_messwerte` must be a character" = is.character(path_rohdaten_messwerte))
+  stopifnot("`url_schwellenwerte` must be a character" = is.character(url_schwellenwerte))
+  stopifnot("`url_messorte` must be a character." = is.character(url_messorte))
+  stopifnot("`type_rolling_mean` must be a character." = is.character(type_rolling_mean))
+  stopifnot("`rolling_mean_breite` must be numeric" = is.numeric(rolling_mean_breite))
+  stopifnot("`Einheit_kurz` must be a character." = is.character(Einheit_kurz))
+  stopifnot("`Einheit_lang` must be a character." = is.character(Einheit_lang))
+  stopifnot("`path_aufbereitetem_file` must be a character." = is.character(path_aufbereitetem_file))
 
-# 1. Packages und Daten laden
+  # Überprüfe ob die lokalen Files unter den gewählten Pfäden exisitieren
+  stopifnot("Unter dem gewählten Pfad befindet sich kein Rohdaten File oder der Zugriff auf das File ist nicht möglich" = file.exists(path_rohdaten_messwerte))
 
-# Lade benötigte Packages
-library(dplyr)
-library(lubridate)
-#install.packages("zoo")
 
-# Lade benötigte Daten
+# 1. Lade benötigte Daten
+
 df_rohdaten <- readr::read_csv(path_rohdaten_messwerte) # Lade Rohdaten File
-df_schwellenwerte <- read.csv(url_to_schwellewerte) # Lade Schwellenwerte File
-df_messorte <- read.csv(path_to_messorte_file) # Lade Schwellenwerte File
-##---------------------------------------------------------------------------
+df_schwellenwerte <- read.csv(url_schwellenwerte) # Lade Schwellenwerte File
+df_messorte <- read.csv(url_messorte) # Lade Messorte File
 
 # 2. Schwellenwert-Bereinigung:
 
@@ -90,7 +86,7 @@ df_grouped_rolling <- df_merged %>%
   ) %>%
   dplyr::ungroup() %>%
   dplyr::group_by(Jahr, Messort_Code, Kategorie) %>% # Groupiere und berechne den rolling mean im nächsten Schritt pro Gruppe
-  dplyr::mutate(sixmin_avg = zoo::rollapply(value_grouped, rolling_mean_breite ,mean,align=art_der_aggregation,fill=NA))
+  dplyr::mutate(sixmin_avg = zoo::rollapply(value_grouped, rolling_mean_breite ,mean,align=type_rolling_mean,fill=NA))
 
 # Bilde Mittelwerte
 df_grouped_max <- df_grouped_rolling %>%
@@ -108,7 +104,7 @@ df_final <- merge(df_grouped_max, df_messorte[c('Messort_Code', 'Messort_Name', 
 ##---------------------------------------------------------------------------
 
 # 4. Speichere Daten als CSV
-write.csv(df_final, file = path_to_aufbereitem_file, row.names = FALSE)
+write.csv(df_final, file = path_aufbereitetem_file, row.names = FALSE)
 ##---------------------------------------------------------------------------
 
-## ----------------------------------------------------------------------------------------------------------------
+}
