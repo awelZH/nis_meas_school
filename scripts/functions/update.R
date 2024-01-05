@@ -84,7 +84,7 @@ stopifnot("Es konnte keine Aufbereitete Daten ID vom MDV mit diesem Titel unter 
   try(zhMetadatenAPI::update_distribution(user=mdv_user,
                                           pw=mdv_pw,
                                           distribution_id = ressourcen_id_aufbereitete_daten,
-                                          file_path = path_aufbereitem_file,
+                                          file_path = path_aufbereitetem_file,
                                           modified_next= next_expected_update_date, # Datum des nächsten geplanten Update des Datasets
                                           start_date= min_date, # Start der Zeitspanne welche das Dataset abdeckt
                                           end_date= max_date, # Ende der Zeitspanne welche das Dataset abdeckt
