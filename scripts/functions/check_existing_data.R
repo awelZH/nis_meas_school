@@ -24,13 +24,13 @@ retrieve_existing_data <- function(messwerte_url = "https://www.web.statistik.zh
 
 
 
-  list("Einzelmessungen" = unique_einzel_list, "Langzeitmessungen" = unique_langzeit_list, "Langzeitmessungen_ID_df" = messorte_df)
+  list("Einzelmessungen" = unique_einzel_list, "Langzeitmessungen" = unique_langzeit_list, "Messorte" = messorte_df)
 
 }
 
 
 
-# function to clean einzeldaten
+# function to clean einzeldaten (only returns Messorte which are "new" in the folder structure)
 clean_einzel_list <- function(csv_list, id_list) {
   # Convert id_list to numeric for matching
   id_list <- as.numeric(id_list)
@@ -47,8 +47,8 @@ clean_einzel_list <- function(csv_list, id_list) {
 }
 
 
-# function to clean langzeitdaten
-clean_nested_list <- function(csv_list, df_nested_list) {
+# function to clean langzeitdaten (only returns Messorte/Years which are "new" in the folder structure)
+clean_langzeit_list <- function(csv_list, df_nested_list) {
   # Process the names to extract Messort_Code
   names(csv_list) <- str_extract(names(csv_list), "\\d+")
 
@@ -66,80 +66,106 @@ clean_nested_list <- function(csv_list, df_nested_list) {
 }
 
 
-delta_test <- clean_einzel_list(csv_paths_list_all, test_list$Einzelmessungen[1:200])
+# function to report the delta for langzeitdaten
+report_delta_langzeit <- function(existing_ogd, delta_langzeit) {
+  existing_ids <- names(existing_ogd$Langzeitmessungen)
+  delta_ids <- names(delta_langzeit)
 
-report_changes_in_list <- function(original_list, cleaned_list) {
-  new_ids <- c()
-  ids_with_new_years <- c()
+  new_ids <- setdiff(delta_ids, existing_ids)
+  ids_with_new_years <- character()
   new_years_summary <- list()
-  new_ids_years_summary <- list()
 
-  # Get the list of all IDs from both lists
-  all_ids <- unique(c(names(original_list), names(cleaned_list)))
+  for (id in intersect(delta_ids, existing_ids)) {
+    new_years <- setdiff(names(delta_langzeit[[id]]), names(existing_ogd$Langzeitmessungen[[id]]))
 
-  for (id in all_ids) {
-    if (!id %in% names(original_list)) {
-      # New ID introduced
-      new_ids <- c(new_ids, id)
-      new_ids_years_summary[[id]] <- names(cleaned_list[[id]])
-    } else if (id %in% names(cleaned_list)) {
-      # Compare years for existing IDs
-      original_years <- names(original_list[[id]])
-      cleaned_years <- names(cleaned_list[[id]])
-      new_years <- setdiff(cleaned_years, original_years)
-
-      if (length(new_years) > 0) {
-        ids_with_new_years <- c(ids_with_new_years, id)
-        new_years_summary[[id]] <- new_years
-      }
+    if (length(new_years) > 0) {
+      ids_with_new_years <- c(ids_with_new_years, id)
+      new_years_summary[[id]] <- new_years
     }
   }
 
-  # Formatting the output
   if (length(new_ids) > 0) {
-    cli::cli_alert_info("Neue Messorte IDs in Ornderstruktur welche noch nicht Teil der OGD Publikation sind:")
-    cli::cli_ul()
-    for (id in names(new_ids_years_summary)) {
-      cli::cli_li("{.strong {id}} mit den Jahren {paste(new_ids_years_summary[[id]], collapse = ', ')}")
+    cli_alert_info("Neue Messorte IDs in Ordnerstruktur welche noch nicht Teil der OGD Publikation sind:")
+    cli_ul()
+    cli_li(sprintf("{.strong %s}", paste(new_ids, collapse = ', ')))
+    if (length(ids_with_new_years) > 0) {
+      cli_text(sprintf("Neue Messungen für diese IDs für die Jahre %s",
+                       paste(sapply(new_ids, function(id) paste(new_years_summary[[id]], collapse = ', ')),
+                             collapse = ', ')))
     }
-    cli::cli_end()
+    cli_end()
   }
+
   if (length(ids_with_new_years) > 0) {
-    cli::cli_alert_success("Neue Messungen in Ordnerstruktur für die folgenden IDs gefunden:")
-    cli::cli_ul()
-    for (id in names(new_years_summary)) {
-      cli::cli_li("{.strong {id}} für die Jahre {paste(new_years_summary[[id]], collapse = ', ')}")
+    cli_alert_success("Neue Messungen in Ordnerstruktur für die vorhandenen IDs gefunden:")
+    cli_ul()
+    for (id in ids_with_new_years) {
+      cli_li(sprintf("{.strong %s} für die Jahre %s", id, paste(new_years_summary[[id]], collapse = ', ')))
     }
-    cli::cli_end()
+    cli_end()
   }
 
-  invisible(new_ids)
+  if (length(new_ids) == 0 && length(ids_with_new_years) == 0) {
+    cli_alert_info("Keine neuen Messorte oder Messungen für vorhandene IDs in der Ordnerstruktur gefunden.")
+  }
 
+  # Create a tibble with the results
+  result <- tibble(ID = c(new_ids, ids_with_new_years),
+                   New_Measurement_Years = sapply(c(new_ids, ids_with_new_years), function(id) {
+                     if (id %in% new_ids) {
+                       paste(new_years_summary[[id]], collapse = ', ')
+                     } else {
+                       paste(new_years_summary[[id]], collapse = ', ')
+                     }
+                   }),
+                   Is_Totally_New = ifelse(ID %in% new_ids, "Totally New", "New Years Only"))
+
+  invisible(result)
 }
 
+# function to report the delta for einzelmessungen
+report_delta_einzel <- function(existing_ogd, delta_einzel) {
+  existing_ids <- names(existing_ogd$Einzelmessungen)
+  delta_ids <- names(delta_einzel)
 
-report_new_ids_for_einzel_list <- function(original_list, cleaned_list) {
-  # Identifizieren neuer IDs (nicht in original_list, aber in cleaned_list)
-  new_ids <- setdiff(names(cleaned_list), names(original_list))
+  new_ids <- setdiff(delta_ids, existing_ids)
 
-  # Reporting nur für neue IDs
   if (length(new_ids) > 0) {
-    cli::cli_alert_info("Neue Messorte IDs in Ordnerstruktur welche noch nicht Teil der OGD Publikation sind:")
-    cli::cli_ul()
-    for (id in new_ids) {
-      cli::cli_li(cli::style_bold(id))
+    cli_alert_info("Neue Messorte IDs in Ordnerstruktur welche noch nicht Teil der OGD Publikation sind:")
+    cli_ul()
+    for (new_id in new_ids) {
+      cli_li(paste("{.strong", new_id, "}"))
     }
-    cli::cli_end()
-  } else {
-    cli::cli_alert_info("Keine neuen Messorte IDs gefunden.")
+    cli_end()
   }
 
-  return(new_ids)
+  # Create a tibble with the results
+  result <- tibble(ID = new_ids,
+                   Is_Totally_New = "Totally New")
+
+  invisible(result)
 }
 
-report_new_ids_for_einzel_list(original_list = csv_paths_list_all, cleaned_list = delta_test)
+# Function to check if the online resource has been updated
+check_delta_vs_existing <- function(existing_messorte, delta_langzeit, delta_einzel) {
+  # Get Messort_Codes from the existing Messorte
+  existing_codes <- existing_messorte$Messort_Code
 
-report_changes_in_list(csv_paths_list_all_langzeit, cleaned_list = delta_test) -> test_return
+  # Get Messort_Codes from delta_langzeit and delta_einzel
+  delta_langzeit_codes <- as.integer(delta_langzeit$ID)
+  delta_einzel_codes <- delta_einzel$ID %>%
+    str_extract(pattern = "\\d+") %>%
+    as.integer()
 
+    # Combine all Messort_Codes from deltas
+  all_delta_codes <- c(delta_langzeit_codes, delta_einzel_codes)
 
-
+  # Check if all delta codes are in the existing codes
+  if (all(all_delta_codes %in% existing_codes)) {
+    # Success message if all codes match
+    cli_alert_success("Die OGD Ressource 'Messorte' scheint aktuell zu sein. Alle neuen Messungen in Ordnerstruktur finden sich in den Messorten wieder.")
+  } else {
+    # Error message if there are unmatched codes
+    cli_alert_error_message("Die OGD Ressource 'Messorte' scheint NICHT aktuell zu sein. Es gibt neue Dateien in der Ordnerstruktur welche keine Messort_ID zugeordnet haben in der OGD Ressource. Bitte OGD Ressource anpassen bevor ein delta-load vorgenommen wird.")
+  }
+}
