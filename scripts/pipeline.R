@@ -1,18 +1,43 @@
 # pipeline
 
 # Get the paths of CSV files
-top_folder_path <- "Schulhausmessungen"
+
+
+
 
 csv_paths_list_5 <- extract_csv_paths_einzel(top_folder_path, num_dirs = 5)
 
-csv_paths_list_all <- extract_csv_paths_einzel(top_folder_path, num_dirs = Inf)
+csv_paths_list_all <- extract_csv_paths_einzel(top_folder_path = "Schulhausmessungen", num_dirs = Inf)
 
-csv_paths_list_all_langzeit <- extract_csv_paths_langzeit(top_folder_path = "Langzeit-Messungen")
+csv_paths_list_all_langzeit <- extract_csv_paths_langzeit(top_folder_path = "Langzeit-Messungen", num_dirs = Inf)
 
 
-filtered_einzel <- filter_csv_files_einzel(paths_list = csv_paths_list_5)
+filtered_einzel <- filter_csv_files_einzel(paths_list = csv_paths_list_all)
 
 filtered_langzeit <- filter_csv_files_langzeit(paths_list = csv_paths_list_all_langzeit)
+
+# delta checks follow here
+
+existing_ogd <- retrieve_existing_data()
+
+# Removing specific years from the vector
+years_to_remove <- c("2022", "2018")
+existing_ogd$Langzeitmessungen[[17]] <- existing_ogd$Langzeitmessungen[[17]][!existing_ogd$Langzeitmessungen[[17]] %in% years_to_remove]
+
+
+delta_einzel <- clean_einzel_list(filtered_einzel, id_list = existing_ogd$Einzelmessungen[6:23])
+delta_langzeit <- clean_langzeit_list(filtered_langzeit, df_nested_list = existing_ogd$Langzeitmessungen)
+
+# report the delta (invisibly returns a data frame for delta checks / not used in processing)
+
+delta_report_einzel <- report_delta_einzel(existing_ogd, delta_einzel)
+delta_report_langzeit <- report_delta_langzeit(existing_ogd, delta_langzeit)
+
+# this should be used in the delta-load function as a assertion and skip condition
+check_delta_vs_existing(existing_ogd$Messorte, delta_report_langzeit, delta_report_einzel)
+
+# only after this step, the actual delta load with delta_einzel & delta_langzeit should be performed
+# the full load does not need all this and will just handle all the data
 
 # Example usage
 
