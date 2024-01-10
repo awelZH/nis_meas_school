@@ -77,6 +77,8 @@ check_na_langzeitmessungen <- function(langzeitmessungen_list) {
 }
 
 
+
+
 # pull github changes
 update_project_from_github <- function() {
   # Define the command to pull from the remote repository
@@ -84,4 +86,17 @@ update_project_from_github <- function() {
 
   # Run the command in the shell
   system(git_command, intern = TRUE)
+
 }
+
+# Check if File is available from URL
+check_file_availability <- function(file_url) {
+  # Send a HEAD request to the URL
+  response <- httr::HEAD(file_url)
+
+  # Check if the status code is 200 (OK)
+  if (httr::status_code(response) == 200) {
+    return(TRUE)  # File is available
+  } else {
+    return(FALSE) # File is not available
+  }
