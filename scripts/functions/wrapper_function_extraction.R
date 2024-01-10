@@ -124,9 +124,9 @@ extract <- function(delta_load = TRUE,
     # state success!
     cli::cli_alert_success("Pfade zu Wiederholungsmessungsdaten wurden eingelesen!")
 
-
     # process the csv paths and read in data
     measurements_data_einzel <- process_csv_data_einzel(csv_paths_list_all_einzel)
+
 
     measurements_data_langzeit <- process_csv_data_langzeit(csv_paths_list_all_langzeit)
 
