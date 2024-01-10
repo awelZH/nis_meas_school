@@ -1,12 +1,15 @@
 # Function to filter out HEADER CSV files
 filter_csv_files_einzel <- function(paths_list) {
-  map(cli_progress_along(paths_list), function(i) {
-    folder_info <- paths_list[[i]]
+  # Map function with preservation of names
+  map2(paths_list, names(paths_list), function(folder_info, name) {
     folder_info$csv_files <- folder_info$csv_files %>%
       keep(~ !str_detect(.x, "_HEADER\\.csv"))
-    folder_info
-  })
+    # Set the name for each element
+    setNames(folder_info, name)
+  }) %>% set_names(names(paths_list))
 }
+
+
 
 filter_csv_files_langzeit <- function(paths_list) {
   # Helper function to filter out HEADER CSV files
@@ -74,6 +77,18 @@ check_na_langzeitmessungen <- function(langzeitmessungen_list) {
 }
 
 
+
+
+# pull github changes
+update_project_from_github <- function() {
+  # Define the command to pull from the remote repository
+  git_command <- "git pull origin main"
+
+  # Run the command in the shell
+  system(git_command, intern = TRUE)
+
+}
+
 # Check if File is available from URL
 check_file_availability <- function(file_url) {
   # Send a HEAD request to the URL
@@ -85,4 +100,3 @@ check_file_availability <- function(file_url) {
   } else {
     return(FALSE) # File is not available
   }
-}
