@@ -72,3 +72,17 @@ check_na_langzeitmessungen <- function(langzeitmessungen_list) {
 
   return(na_containing_paths)
 }
+
+
+# Check if File is available from URL
+check_file_availability <- function(file_url) {
+  # Send a HEAD request to the URL
+  response <- httr::HEAD(file_url)
+
+  # Check if the status code is 200 (OK)
+  if (httr::status_code(response) == 200) {
+    return(TRUE)  # File is available
+  } else {
+    return(FALSE) # File is not available
+  }
+}
