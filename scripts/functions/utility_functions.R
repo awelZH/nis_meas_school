@@ -75,3 +75,16 @@ check_na_langzeitmessungen <- function(langzeitmessungen_list) {
 
   return(na_containing_paths)
 }
+
+
+# pull github changes
+update_project_from_github <- function(repo_path = ".") {
+  # Open the repository at the given path
+  repo <- gert::git_open(repo_path)
+
+  # Fetch updates from the remote
+  gert::git_fetch(repo)
+
+  # Pull changes from the remote tracking branch
+  gert::git_pull(repo)
+}
