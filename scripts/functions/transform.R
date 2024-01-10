@@ -213,7 +213,7 @@ transform <- function(){
   setwd(home)
 
   cli::cli_alert_info("rohdaten_messwerte.zip wurde lokal gespeichert")
-  cli_alert_info("Transform Skript ist erfolgreich durchgelaufen")
+  cli::cli_alert_info("Transform Skript ist erfolgreich durchgelaufen")
   cli::cli_progress_done()
 
   ##---------------------------------------------------------------------------
