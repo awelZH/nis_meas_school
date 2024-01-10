@@ -1,12 +1,15 @@
 # Function to filter out HEADER CSV files
 filter_csv_files_einzel <- function(paths_list) {
-  map(cli_progress_along(paths_list), function(i) {
-    folder_info <- paths_list[[i]]
+  # Map function with preservation of names
+  map2(paths_list, names(paths_list), function(folder_info, name) {
     folder_info$csv_files <- folder_info$csv_files %>%
       keep(~ !str_detect(.x, "_HEADER\\.csv"))
-    folder_info
-  })
+    # Set the name for each element
+    setNames(folder_info, name)
+  }) %>% set_names(names(paths_list))
 }
+
+
 
 filter_csv_files_langzeit <- function(paths_list) {
   # Helper function to filter out HEADER CSV files
@@ -71,4 +74,17 @@ check_na_langzeitmessungen <- function(langzeitmessungen_list) {
   }
 
   return(na_containing_paths)
+}
+
+
+# pull github changes
+update_project_from_github <- function(repo_path = ".") {
+  # Open the repository at the given path
+  repo <- gert::git_open(repo_path)
+
+  # Fetch updates from the remote
+  gert::git_fetch(repo)
+
+  # Pull changes from the remote tracking branch
+  gert::git_pull(repo)
 }
