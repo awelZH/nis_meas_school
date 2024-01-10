@@ -7,6 +7,6 @@ source_files(path = "scripts/functions")
 update_project_from_github()
 
 # run the pipeline
-extract(delta_load = TRUE, path_rohdaten_topfolder = here::here())
+extract(delta_load = TRUE, path_rohdaten_topfolder = "~/file-server/file-server/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/")
 
 
