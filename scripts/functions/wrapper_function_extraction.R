@@ -14,7 +14,7 @@ extract <- function(delta_load = TRUE,
 
   if (delta_load == TRUE) {
     # check existing ogd ressources for Messorte & Jahre
-    browser()
+
 
     cli::cli_alert_info("Delta Load wird durchgeführt.")
 
@@ -24,14 +24,14 @@ extract <- function(delta_load = TRUE,
     # state success!
     cli::cli_alert_success("Existierende OGD Ressourcen heruntergeladen!")
 
-    csv_paths_list_all_einzel <- extract_csv_paths_einzel(top_folder_path = "Schulhausmessungen", num_dirs = Inf) %>%
+    csv_paths_list_all_einzel <- extract_csv_paths_einzel(top_folder_path = fs::path(path_rohdaten_topfolder, "Schulhausmessungen"), num_dirs = Inf) %>%
       filter_csv_files_einzel()
 
     # state success!
     cli::cli_alert_success("Pfade zu Einzelmessungsdaten wurden eingelesen!")
 
 
-    csv_paths_list_all_langzeit <- extract_csv_paths_langzeit(top_folder_path = "Langzeit-Messungen", num_dirs = Inf) %>%
+    csv_paths_list_all_langzeit <- extract_csv_paths_langzeit(top_folder_path = fs::path(path_rohdaten_topfolder, "Langzeit-Messungen"), num_dirs = Inf) %>%
       filter_csv_files_langzeit()
 
     # state success!
@@ -111,14 +111,14 @@ extract <- function(delta_load = TRUE,
 
     cli::cli_alert_info("Full Load wird durchgeführt.")
 
-    csv_paths_list_all_einzel <- extract_csv_paths_einzel(top_folder_path = "Schulhausmessungen", num_dirs = Inf) %>%
+    csv_paths_list_all_einzel <- extract_csv_paths_einzel(top_folder_path = fs::path(path_rohdaten_topfolder, "Schulhausmessungen"), num_dirs = Inf) %>%
       filter_csv_files_einzel()
 
     # state success!
     cli::cli_alert_success("Pfade zu Einzelmessungsdaten wurden eingelesen!")
 
 
-    csv_paths_list_all_langzeit <- extract_csv_paths_langzeit(top_folder_path = "Langzeit-Messungen", num_dirs = Inf) %>%
+    csv_paths_list_all_langzeit <- extract_csv_paths_langzeit(top_folder_path = fs::path(path_rohdaten_topfolder, "Langzeit-Messungen"), num_dirs = Inf) %>%
       filter_csv_files_langzeit()
 
     # state success!
