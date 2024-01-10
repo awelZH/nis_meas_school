@@ -5,8 +5,8 @@ suppressWarnings(if (!require("pacman")) install.packages("pacman"))
 
 # load packages and install if not installed --------------------------------------------
 pacman::p_load(cli, purrr, stringr, vroom, janitor, readr, vctrs, dplyr, fs, data.table,
-               tibble, assertthat,
-               install = TRUE,
+               tibble, assertthat, gert, zoo,
+               install = FALSE,
                update = FALSE)
 
 # show loaded packages ------------------------------------------------------------------
