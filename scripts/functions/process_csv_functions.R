@@ -3,35 +3,40 @@ process_csv_data_einzel <- function(filtered_paths_list) {
   total_folders <- length(filtered_paths_list)
   counter <- 1
 
+
   map(filtered_paths_list, function(folder_info) {
-    csv_files <- folder_info$csv_files
+    # Dynamically get the folder name which ends with "_Daten"
+    folder_name <- names(folder_info)[1]  # Since each list has only one element with the pattern "_Daten"
+    csv_files <- folder_info[[folder_name]]
 
     # Print the current progress of folders
     cat(sprintf("Processing folder %d out of %d\n", counter, total_folders))
 
     processed_files <- map(cli_progress_along(csv_files), function(i) {
-      file <- csv_files[[i]]
-      file_contents <- fread(file = file, skip = "Fmin [Hz]") %>%
+      file_path <- csv_files[[i]]  # Use the index to get the actual file path
+      file_contents <- fread(file = file_path, skip = "Fmin [Hz]") %>%
         clean_names()
 
       # Read the first 10 lines to extract date and time
-      timestamp <- file %>%
+      timestamp <- file_path %>%
         read_lines(n_max = 10) %>%
         str_extract(pattern = "(?<=Time;|Date;)[^;]+") %>%
         discard(is.na) %>%
         str_flatten(collapse = "T")
 
+      # If Messort_Code is needed and can be derived from folder_name, extract it. Otherwise, remove it.
       file_contents %>%
-        mutate(Zeitstempel = timestamp, Messort_Code = folder_info$messort_code) %>%
+        mutate(Zeitstempel = timestamp) %>%
         select(-v1) %>%
-        mutate(Messort_Code = str_extract(Messort_Code, "[[:digit:]]+"))
-    }) %>% list_rbind()
+        mutate(Messort_Code = str_extract(folder_name, "\\d+"))
+    }) %>% bind_rows()
 
     # Increment the counter after processing each folder
     counter <<- counter + 1
     processed_files
   })
 }
+
 
 # function to process langzeit data
 process_csv_data_langzeit <- function(filtered_paths_list) {
