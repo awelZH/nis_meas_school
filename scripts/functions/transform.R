@@ -9,10 +9,7 @@ transform <- function(){
   # 0. Parameter setzen und überprüfen
   ##---------------------------------------------------------------------------
   cli::cli_alert_info("Starte Transform Prozess")
-  cli::cli_progress_bar("Transform data", total = 8)
 
-  #Definiere Home Verzeichnis
-  home <- here::here()
   # Datenpfad als String zum Rohdaten File. Dieses File wurde im vorherigen Schritt erzeugt.
   path_rohdaten_messwerte = "data/temp/extract/rohdaten_messwerte.csv"
   #URL zum Rohdaten Messwerte Zip File (OGD) als String
@@ -22,7 +19,7 @@ transform <- function(){
   # URL zum Messorte OGD File als String
   url_messorte = 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv'
   type_rolling_mean <- 'center' # Wie der Rolling mean berechnet wird
-  rolling_mean_breite <- 60 # Wie viele Werte pro Wert im rolling mean berücksichtigt werden
+  rolling_mean_breite <- 60 # Wie viele Wertepro Wert im rolling mean berücksichtigt werden
   Einheit_kurz <- "V/m" #Einheit der zu darzustellenden Werte (SI Einheiten) als String
   Einheit_lang <- "Volt pro Meter" #Einheit der zu darzustellenden Werte (ausgeschrieben) als String
   # Datenpfad als String wo alle Input Files von diesem Skript gespeichert werden
@@ -33,6 +30,7 @@ transform <- function(){
   aufbereite_messwerte_ogd_filename <- 'aufbereitete_messwerte'
   # Dateiname als String zum Rohdaten Messwerte File.
   rohdaten_messwerte_ogd_filename <- 'rohdaten_messwerte'
+  path_to_rohdaten_folder <- 'data/temp/transform/rohdaten/'
 
   # Überprüfe, ob die Parameter den richtigen Typ haben. Ansonsten breche ab und werfe Fehlermeldung
   assertthat::assert_that(msg = "path_rohdaten_messwerte` must be a character" , is.character(path_rohdaten_messwerte))
@@ -46,6 +44,31 @@ transform <- function(){
   assertthat::assert_that(msg = "path_to_transform_folder` must be a character." , is.character(path_to_transform_folder))
   assertthat::assert_that(msg = "aufbereite_messwerte_ogd_filename` must be a character." , is.character(aufbereite_messwerte_ogd_filename))
   assertthat::assert_that(msg = "rohdaten_messwerte_ogd_filename` must be a character." , is.character(rohdaten_messwerte_ogd_filename))
+  assertthat::assert_that(msg = "path_to_rohdaten_folder` must be a character." , is.character(path_to_rohdaten_folder))
+
+  # Überprüfe, ob das Transform Verzeichnis verfügbar ist
+  if(!dir.exists(path_to_transform_folder)){
+    cli::cli_abort(paste0(path_to_transform_folder, " Verzeichnis nicht verfügbar oder der Zugriff auf das Verzeichnis ist nicht möglich"))
+  }
+
+  # Überprüfe, ob das Load Verzeichnis verfügbar ist
+  if(!dir.exists(path_to_load_folder)){
+    cli::cli_abort(paste0(path_to_load_folder, " Verzeichnis nicht verfügbar oder der Zugriff auf das Verzeichnis ist nicht möglich"))
+  }
+
+  # Lade Schwellenwerte File und lade es in ein Data Frame
+  if(check_file_availability(url_schwellenwerte)){
+    df_schwellenwerte <- read.csv(url_schwellenwerte) # Lade Schwellenwerte File
+  }else{
+    cli::cli_abort("Schwellenwerte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
+  }
+
+  # Lade Schwellenwerte File und lade es in ein Data Frame
+  if(check_file_availability(url_schwellenwerte)){
+    df_schwellenwerte <- read.csv(url_schwellenwerte) # Lade Schwellenwerte File
+  }else{
+    cli::cli_abort("Schwellenwerte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
+  }
 
    ##---------------------------------------------------------------------------
   # 1. Lade benötigte Daten und erstelle Zip OGD File
@@ -64,8 +87,8 @@ transform <- function(){
   if(check_file_availability(url_rohdaten_messwerte)){
     # Lade OGD Rohdaten und speichere sie als CSV
     download.file(url_rohdaten_messwerte, paste0(path_to_transform_folder, "rohdaten_messwerte.zip"))
-    unzip(file.path(path_to_transform_folder, "rohdaten_messwerte.zip"), exdir = path_to_transform_folder)
-    df_rohdaten_messwerte_ogd <- read.csv(file.path(path_to_transform_folder, "rohdaten_messwerte.csv"))
+    df_rohdaten_messwerte_ogd <- readr::read_csv(archive::archive_read(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip")))
+
   }else{
     cli::cli_abort("Kein OGD Rohdaten File verfügbar oder der Zugriff auf das File ist nicht möglich")
   }
@@ -89,8 +112,7 @@ transform <- function(){
   df_rohdaten <- rbind(df_rohdaten_raw, df_rohdaten_messwerte_ogd) %>%
     dplyr::distinct()
 
-    cli::cli_progress_update()
-    cli::cli_alert_info("Rohdaten CSV (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
+  cli::cli_alert_info("Rohdaten CSV (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
 
   ##---------------------------------------------------------------------------
   # 2. Schwellenwert-Bereinigung:
@@ -124,7 +146,6 @@ transform <- function(){
   df_schwellenwerte <- df_schwellenwerte %>%
     mutate(gueltig_bis = if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis))
 
-  cli::cli_progress_update()
   cli::cli_alert_info("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgeführt")
 
   # Merge Rohdaten mit Schwellenwerte Daten. Da ein Inner join gemacht wird, bleiben nur die Zeilen übrig, welche in beiden Dataframe vorkommen. Damit werden z.B alte Services wie "Others I",
@@ -134,7 +155,6 @@ transform <- function(){
 
   # Zeige Anzahl nicht erfolgreiche Joins dem User an:
   number_of_anti_joins <- nrow(anti_join(temp, df_schwellenwerte, by))
-  cli::cli_progress_update()
 
   cli::cli_alert_info(paste0(number_of_anti_joins, " Messwerten konnte keine Schwellenwerte hinzugefügt werden."))
   cli::cli_alert_info("Schwellenwerte wurden erfolgreich den Messwerten hinzugefügt")
@@ -146,7 +166,6 @@ transform <- function(){
   # Ersetze die korrgierten Werte mit 0, wenn sie kleiner als 0 sind
   df_merged$Value_V_per_m_corrected <- ifelse(df_merged$Value_V_per_m_corrected < 0, 0, df_merged$Value_V_per_m_corrected)
 
-  cli::cli_progress_update()
   cli::cli_alert_info("Schwellenwertbereinigung erfolgreich durchgeführt")
 
   ##---------------------------------------------------------------------------
@@ -164,7 +183,6 @@ transform <- function(){
     dplyr::group_by(Jahr, Messort_Code, Kategorie) %>% # Groupiere und berechne den rolling mean im nächsten Schritt pro Gruppe
     dplyr::mutate(sixmin_avg = zoo::rollapply(value_grouped, rolling_mean_breite ,mean,align=type_rolling_mean,fill=NA))
 
-  cli::cli_progress_update()
   cli::cli_alert_info("Messwerte wurden pro Kategorie quadratisch summiert und danach die Wurzel gezogen")
 
 
@@ -174,7 +192,6 @@ transform <- function(){
     dplyr::group_by(Jahr, Messort_Code, Service) %>%
     dplyr::summarise(Wert = max(sixmin_avg, na.rm = TRUE))
 
-  cli::cli_progress_update()
   cli::cli_alert_info("Die rollierende Mittelwerte wurden erfolgreich berechnet")
 
   # Joine Information für finales Dataframe
@@ -183,7 +200,6 @@ transform <- function(){
            Einheit_lang = Einheit_lang) %>%
     select(Jahr, Messort_Code, Messort_Name, Service, Wert, Einheit_kurz, Einheit_lang, Messintervall)
 
-  cli::cli_progress_update()
   cli::cli_alert_info("Weitere Informationen wurden dem Dataset hinzugefügt")
 
   ##---------------------------------------------------------------------------
@@ -193,28 +209,20 @@ transform <- function(){
   # Speichere aufbereites messwerte File als CSV
   readr::write_csv(df_final, file = paste0(path_to_load_folder, aufbereite_messwerte_ogd_filename, ".csv"))
 
-  cli::cli_progress_update()
   cli::cli_alert_info("aufbereitete_messwerte.csv wurde lokal gespeichert")
 
-
-  #Speichere Rohdaten messwerte File als CSV
-  readr::write_csv(df_rohdaten, file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".csv"))
-
-  # Setze working directory temporär anders, da ansonsten beim Zippen die ganze Ordner Struktur mit gezippt wird
-  setwd(path_to_load_folder)
+  #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
+  dir.create(path_to_rohdaten_folder)
+  readr::write_csv(df_rohdaten, file = paste0(path_to_rohdaten_folder, rohdaten_messwerte_ogd_filename, ".csv"))
 
   # Speichere Rohdaten File als Zip
-  zip(paste0(rohdaten_messwerte_ogd_filename, ".zip"), files= paste0(rohdaten_messwerte_ogd_filename, ".csv"))
+  archive::archive_write_dir(archive = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip"), dir = path_to_rohdaten_folder)
 
-  # Lösche temporäres CSV File
-  file.remove(paste0(rohdaten_messwerte_ogd_filename, ".csv"))
-
-  # Setzte Working Directory zurück
-  setwd(home)
+  # Lösche temporärer Ordner
+  unlink(path_to_rohdaten_folder, recursive = TRUE)
 
   cli::cli_alert_info("rohdaten_messwerte.zip wurde lokal gespeichert")
   cli::cli_alert_info("Transform Skript ist erfolgreich durchgelaufen")
-  cli::cli_progress_done()
 
   ##---------------------------------------------------------------------------
 
