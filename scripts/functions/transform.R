@@ -5,6 +5,7 @@
 #' @examples transform()
 transform <- function(){
 
+
   ##---------------------------------------------------------------------------
   # 0. Parameter setzen und überprüfen
   ##---------------------------------------------------------------------------
@@ -87,7 +88,7 @@ transform <- function(){
   if(check_file_availability(url_rohdaten_messwerte)){
     # Lade OGD Rohdaten und speichere sie als CSV
     download.file(url_rohdaten_messwerte, paste0(path_to_transform_folder, "rohdaten_messwerte.zip"))
-    df_rohdaten_messwerte_ogd <- readr::read_csv(archive::archive_read(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip")))
+    df_rohdaten_messwerte_ogd <- readr::read_csv(archive::archive_read(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip")), show_col_types = FALSE)
 
   }else{
     cli::cli_abort("Kein OGD Rohdaten File verfügbar oder der Zugriff auf das File ist nicht möglich")
@@ -112,7 +113,7 @@ transform <- function(){
   df_rohdaten <- rbind(df_rohdaten_raw, df_rohdaten_messwerte_ogd) %>%
     dplyr::distinct()
 
-  cli::cli_alert_info("Rohdaten CSV (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
+  cli::cli_alert_success("Rohdaten Zip (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
 
   ##---------------------------------------------------------------------------
   # 2. Schwellenwert-Bereinigung:
@@ -124,7 +125,7 @@ transform <- function(){
   temp <- tidyr::separate(df_rohdaten, Zeitstempel, into = c("Datum", "Uhrzeit"), sep = "T")
 
   # Da die Rohdaten verschiedene Formate in den Zeitstempel haben, werden mehrere Schritte ausgeführt, um am Schluss ein einheitliches Datum Uhrzeit Format für alle zu erhalten
-  temp$datum1 <- as.Date(lubridate::parse_date_time(temp$Datum, c("dmY", "mdY"))) # Mit diesem Code werden die meisten Formate erkennt.
+  temp$datum1 <- as.Date(suppressWarnings(lubridate::parse_date_time(temp$Datum, c("dmY", "mdY")))) # Mit diesem Code werden die meisten Formate erkennt.
   #Ein Format funktioniert nicht und muss im nächsten Schritt verarbeitet werden.
   temp$datum_corr <- as.Date(ifelse(is.na(temp$datum1), as.character(as.Date(temp$Datum, format = "%d.%m.%y")), as.character(temp$datum1)))
 
@@ -146,7 +147,7 @@ transform <- function(){
   df_schwellenwerte <- df_schwellenwerte %>%
     mutate(gueltig_bis = if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis))
 
-  cli::cli_alert_info("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgeführt")
+  cli::cli_alert_success("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgeführt")
 
   # Merge Rohdaten mit Schwellenwerte Daten. Da ein Inner join gemacht wird, bleiben nur die Zeilen übrig, welche in beiden Dataframe vorkommen. Damit werden z.B alte Services wie "Others I",
   # ausgeschlossen.
@@ -157,7 +158,7 @@ transform <- function(){
   number_of_anti_joins <- nrow(anti_join(temp, df_schwellenwerte, by))
 
   cli::cli_alert_info(paste0(number_of_anti_joins, " Messwerten konnte keine Schwellenwerte hinzugefügt werden."))
-  cli::cli_alert_info("Schwellenwerte wurden erfolgreich den Messwerten hinzugefügt")
+  cli::cli_alert_success("Schwellenwerte wurden erfolgreich den Messwerten hinzugefügt")
 
 
   # Führe Schwellenwertkorrektur durch
@@ -166,7 +167,7 @@ transform <- function(){
   # Ersetze die korrgierten Werte mit 0, wenn sie kleiner als 0 sind
   df_merged$Value_V_per_m_corrected <- ifelse(df_merged$Value_V_per_m_corrected < 0, 0, df_merged$Value_V_per_m_corrected)
 
-  cli::cli_alert_info("Schwellenwertbereinigung erfolgreich durchgeführt")
+  cli::cli_alert_success("Schwellenwertbereinigung erfolgreich durchgeführt")
 
   ##---------------------------------------------------------------------------
   # 3. Berechne rollierende Mittelwerte
@@ -177,30 +178,28 @@ transform <- function(){
   # Berechne rollierender Mittelwert
   df_grouped_rolling <- df_merged %>%
     dplyr::group_by(Jahr, Messort_Code, Kategorie, Zeitstempel_corr) %>%
-    dplyr::summarise(value_grouped = sqrt(sum(Value_V_per_m_corrected^2)) # summiert die quadrierten Argumente & gibt die Quadratwurzel einer Zahl zurück
-    ) %>%
+    # summiert die quadrierten Argumente & gibt die Quadratwurzel einer Zahl zurück
+    dplyr::summarise(value_grouped = sqrt(sum(Value_V_per_m_corrected^2)), .groups = "drop") %>%
     dplyr::ungroup() %>%
     dplyr::group_by(Jahr, Messort_Code, Kategorie) %>% # Groupiere und berechne den rolling mean im nächsten Schritt pro Gruppe
     dplyr::mutate(sixmin_avg = zoo::rollapply(value_grouped, rolling_mean_breite ,mean,align=type_rolling_mean,fill=NA))
-
-  cli::cli_alert_info("Messwerte wurden pro Kategorie quadratisch summiert und danach die Wurzel gezogen")
 
 
   # Bilde Mittelwerte
   df_grouped_max <- df_grouped_rolling %>%
     rename('Service' = "Kategorie") %>%
     dplyr::group_by(Jahr, Messort_Code, Service) %>%
-    dplyr::summarise(Wert = max(sixmin_avg, na.rm = TRUE))
+    dplyr::summarise(Wert = max(sixmin_avg, na.rm = TRUE), .groups = "drop")
 
-  cli::cli_alert_info("Die rollierende Mittelwerte wurden erfolgreich berechnet")
 
   # Joine Information für finales Dataframe
   df_final <- merge(df_grouped_max, df_messorte[c('Messort_Code', 'Messort_Name', 'Messintervall')], by.x = 'Messort_Code', by.y = 'Messort_Code') %>%
     mutate(Einheit_kurz = Einheit_kurz,
-           Einheit_lang = Einheit_lang) %>%
-    select(Jahr, Messort_Code, Messort_Name, Service, Wert, Einheit_kurz, Einheit_lang, Messintervall)
+           Einheit_lang = Einheit_lang,
+           Messgeraet_Typ = "SRM 3006") %>%
+    select(Jahr, Messort_Code, Messort_Name, Service, Wert, Einheit_kurz, Einheit_lang, Messintervall, Messgeraet_Typ)
 
-  cli::cli_alert_info("Weitere Informationen wurden dem Dataset hinzugefügt")
+  cli::cli_alert_success("Berechnung durchgeführt und weitere Informationen wurden hinzugefügt")
 
   ##---------------------------------------------------------------------------
   # 4. Speichere Daten als CSV und Zip
@@ -209,7 +208,7 @@ transform <- function(){
   # Speichere aufbereites messwerte File als CSV
   readr::write_csv(df_final, file = paste0(path_to_load_folder, aufbereite_messwerte_ogd_filename, ".csv"))
 
-  cli::cli_alert_info("aufbereitete_messwerte.csv wurde lokal gespeichert")
+  cli::cli_alert_success("aufbereitete_messwerte.csv wurde lokal gespeichert")
 
   #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
   dir.create(path_to_rohdaten_folder)
@@ -221,8 +220,8 @@ transform <- function(){
   # Lösche temporärer Ordner
   unlink(path_to_rohdaten_folder, recursive = TRUE)
 
-  cli::cli_alert_info("rohdaten_messwerte.zip wurde lokal gespeichert")
-  cli::cli_alert_info("Transform Skript ist erfolgreich durchgelaufen")
+  cli::cli_alert_success("rohdaten_messwerte.zip wurde lokal gespeichert")
+  cli::cli_alert_success("Transform Skript ist erfolgreich durchgelaufen")
 
   ##---------------------------------------------------------------------------
 
