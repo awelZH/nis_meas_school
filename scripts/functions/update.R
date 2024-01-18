@@ -105,7 +105,7 @@ update <- function(){
                                           right_id = 2,
                                           testmode = testmode))
 
-  cli::cli_alert_info("Update Skript ist erfolgreich durchgelaufen")
+  cli::cli_alert_success("Update Skript ist erfolgreich durchgelaufen")
 
 }
 ##---------------------------------------------------------------------------
