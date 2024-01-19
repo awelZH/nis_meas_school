@@ -86,8 +86,8 @@ update <- function(){
   ##---------------------------------------------------------------------------
 
   # Erstelle die Datum Metadaten aus dem Aufbereitetem Data File und dem aktuellen Datum
-  min_date <- as.character(paste0(min(readr::read_csv(path_aufbereitetem_file)$Jahr), "-01-01"))
-  max_date <- as.character(paste0(max(readr::read_csv(path_aufbereitetem_file)$Jahr), "-12-31"))
+  min_date <- as.character(paste0(min(readr::read_csv(path_aufbereitetem_file, show_col_types = FALSE)$Jahr), "-01-01"))
+  max_date <- as.character(paste0(max(readr::read_csv(path_aufbereitetem_file, show_col_types = FALSE)$Jahr), "-12-31"))
 
 
   # Lade File in den MDV hoch
