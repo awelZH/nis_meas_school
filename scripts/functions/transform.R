@@ -16,7 +16,7 @@ transform <- function(){
   #URL zum Rohdaten Messwerte Zip File (OGD) als String
   url_rohdaten_messwerte <- 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00005003.zip'
   # URL zum Schwellenwert File als String
-  url_schwellenwerte <- 'https://raw.githubusercontent.com/awelZH/nis_meas_school/0ccd1a18257f2debd9f791530eb646d38761446a/data/frequenzbaender_schwellenwerte.csv'
+  path_schwellenwerte <- 'data/frequenzbaender_schwellenwerte.csv'
   # URL zum Messorte OGD File als String
   url_messorte = 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv'
   type_rolling_mean <- 'center' # Wie der Rolling mean berechnet wird
@@ -36,7 +36,7 @@ transform <- function(){
   # Überprüfe, ob die Parameter den richtigen Typ haben. Ansonsten breche ab und werfe Fehlermeldung
   assertthat::assert_that(msg = "path_rohdaten_messwerte` must be a character" , is.character(path_rohdaten_messwerte))
   assertthat::assert_that(msg = "url_rohdaten_messwerte` must be a character" , is.character(url_rohdaten_messwerte))
-  assertthat::assert_that(msg = "url_schwellenwerte` must be a character" , is.character(url_schwellenwerte))
+  assertthat::assert_that(msg = "path_schwellenwerte` must be a character" , is.character(path_schwellenwerte))
   assertthat::assert_that(msg = "url_messorte` must be a character." , is.character(url_messorte))
   assertthat::assert_that(msg = "type_rolling_mean` must be a character." , is.character(type_rolling_mean))
   assertthat::assert_that(msg = "rolling_mean_breite` must be numeric" , is.numeric(rolling_mean_breite))
@@ -58,15 +58,8 @@ transform <- function(){
   }
 
   # Lade Schwellenwerte File und lade es in ein Data Frame
-  if(check_file_availability(url_schwellenwerte)){
-    df_schwellenwerte <- read.csv(url_schwellenwerte) # Lade Schwellenwerte File
-  }else{
-    cli::cli_abort("Schwellenwerte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
-  }
-
-  # Lade Schwellenwerte File und lade es in ein Data Frame
-  if(check_file_availability(url_schwellenwerte)){
-    df_schwellenwerte <- read.csv(url_schwellenwerte) # Lade Schwellenwerte File
+  if(file.exists(path_schwellenwerte)){
+    df_schwellenwerte <- readr::read_csv(path_schwellenwerte, show_col_types = FALSE) # Lade Schwellenwerte File
   }else{
     cli::cli_abort("Schwellenwerte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
   }
@@ -81,7 +74,6 @@ transform <- function(){
     df_rohdaten_raw <- read.csv(path_rohdaten_messwerte) # Lade Rohdaten File, welches als Delta oder Full Load vorliegt
   }else{
     cli::cli_abort("Kein lokales Rohdaten CSV File verfügbar oder der Zugriff auf das File ist nicht möglich")
-
   }
 
   # Lade Rohdaten OGD ZIP File und lade es in ein Data Frame
@@ -92,13 +84,6 @@ transform <- function(){
 
   }else{
     cli::cli_abort("Kein OGD Rohdaten File verfügbar oder der Zugriff auf das File ist nicht möglich")
-  }
-
-  # Lade Schwellenwerte File und lade es in ein Data Frame
-  if(check_file_availability(url_schwellenwerte)){
-    df_schwellenwerte <- read.csv(url_schwellenwerte) # Lade Schwellenwerte File
-  }else{
-    cli::cli_abort("Schwellenwerte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
   }
 
   # Lade Messorte OGD File und lade es in ein Data Frame
@@ -114,6 +99,7 @@ transform <- function(){
     dplyr::distinct()
 
   cli::cli_alert_success("Rohdaten Zip (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
+
 
   ##---------------------------------------------------------------------------
   # 2. Schwellenwert-Bereinigung:
@@ -139,8 +125,8 @@ transform <- function(){
   temp <- temp[c("fmin_hz", "fmax_hz", "service_name", "value_v_m", "Messort_Code", "Jahr", "datum_corr", "Zeitstempel_corr")]
 
   # Formatiere die Datumspalten im Schwellenwerte Dataframe zu Datum
-  df_schwellenwerte$gueltig_von <- as.Date(df_schwellenwerte$gueltig_von, "%Y-%m-%d")
-  df_schwellenwerte$gueltig_bis <- as.Date(df_schwellenwerte$gueltig_bis, "%Y-%m-%d")
+  df_schwellenwerte$gueltig_von <- as.Date(df_schwellenwerte$gueltig_von, "%d.%m.%Y")
+  df_schwellenwerte$gueltig_bis <- as.Date(df_schwellenwerte$gueltig_bis, "%d.%m.%Y")
 
   # In der Spalte gueltig_bis können NA vorkommen. Dort wo NA vorkommen, heisst das, das die Schwellenwerte immer noch gültig sind. Damit der spätere Join funktioniert,
   # werden die NA mit dem aktuellen DAtum überschrieben.
