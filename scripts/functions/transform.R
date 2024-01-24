@@ -122,7 +122,7 @@ transform <- function(){
   temp$Zeitstempel_corr <- paste0(as.character(temp$datum_corr), "T", as.character(temp$Uhrzeit))
 
   #Wähle die relevanten Spalten aus
-  temp <- temp[c("fmin_hz", "fmax_hz", "service_name", "value_v_m", "Messort_Code", "Jahr", "datum_corr", "Zeitstempel_corr")]
+  temp <- temp[c("Fmin_Hz", "Fmax_Hz", "Service_Name", "Value_V_per_m", "Messort_Code", "Jahr", "datum_corr", "Zeitstempel_corr")]
 
   # Formatiere die Datumspalten im Schwellenwerte Dataframe zu Datum
   df_schwellenwerte$gueltig_von <- as.Date(df_schwellenwerte$gueltig_von, "%d.%m.%Y")
@@ -137,18 +137,25 @@ transform <- function(){
 
   # Merge Rohdaten mit Schwellenwerte Daten. Da ein Inner join gemacht wird, bleiben nur die Zeilen übrig, welche in beiden Dataframe vorkommen. Damit werden z.B alte Services wie "Others I",
   # ausgeschlossen.
-  by <- join_by(fmin_hz == Freq_min, fmax_hz == Freq_max, between(datum_corr, gueltig_von, gueltig_bis))
+  by <- join_by(Fmin_Hz == Freq_min, Fmax_Hz == Freq_max, between(datum_corr, gueltig_von, gueltig_bis))
   df_merged <- inner_join(temp, df_schwellenwerte, by)
 
   # Zeige Anzahl nicht erfolgreiche Joins dem User an:
   number_of_anti_joins <- nrow(anti_join(temp, df_schwellenwerte, by))
 
+  # Speichere Kombinationen von Frequenzen und Jahr in einem Dataframe. Wird nicht für das Ausführen dieses Skript gebraucht, kann aber für Debug Zwecke gebraucht werden.
+  dataset <- anti_join(temp, df_schwellenwerte, by) %>%
+    dplyr::distinct(Fmin_Hz, Fmax_Hz, Service_Name, Jahr) %>%
+    dplyr::arrange(Fmin_Hz, Jahr)
+
+  dataset
+
   cli::cli_alert_info(paste0(number_of_anti_joins, " Messwerten konnte keine Schwellenwerte hinzugefügt werden."))
-  cli::cli_alert_success("Schwellenwerte wurden erfolgreich den Messwerten hinzugefügt")
+  cli::cli_alert_success("Schwellenwerte wurden erfolgreich den Messwerten hinzugefügt", )
 
 
   # Führe Schwellenwertkorrektur durch
-  df_merged$Value_V_per_m_corrected <- df_merged$value_v_m - df_merged$Schwellenwert_MR_Vm
+  df_merged$Value_V_per_m_corrected <- df_merged$Value_V_per_m - df_merged$Schwellenwert_MR_Vm
 
   # Ersetze die korrgierten Werte mit 0, wenn sie kleiner als 0 sind
   df_merged$Value_V_per_m_corrected <- ifelse(df_merged$Value_V_per_m_corrected < 0, 0, df_merged$Value_V_per_m_corrected)
