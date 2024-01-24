@@ -158,7 +158,9 @@ extract <- function(delta_load = TRUE,
       bind_rows()
 
     # combine Langzeitmessungen & Einzelmessungen
-    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed)
+    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
+      dplyr::select(Zeitstempel,Messort_Code,fmin_hz,fmax_hz,service_name,value_v_m) %>% # change order of columns
+      dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 
 
     # write data to data/temp/extract/rohdaten_messwerte.csv
