@@ -124,6 +124,10 @@ extract <- function(delta_load = TRUE,
     # state success!
     cli::cli_alert_success("Pfade zu Wiederholungsmessungsdaten wurden eingelesen!")
 
+
+    # check if OGD Messorte & IDs in folder match -> break if not
+    check_full_load(csv_paths_list_all_einzel, csv_paths_list_all_langzeit)
+
     # process the csv paths and read in data
     measurements_data_einzel <- process_csv_data_einzel(csv_paths_list_all_einzel)
 
