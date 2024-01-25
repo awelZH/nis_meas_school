@@ -100,4 +100,37 @@ check_file_availability <- function(file_url) {
   } else {
     return(FALSE) # File is not available
   }
+}
+
+
+# function to check if files in folder and ogd_messorte are same (full load)
+check_full_load <- function(csv_paths_list_all_einzel, csv_paths_list_all_langzeit){
+
+  # get messorte IDs from OGD ressource
+  existing_ogd_list <- retrieve_existing_data()
+
+
+  messort_ids_ogd <- existing_ogd_list$Messorte %>%
+    dplyr::select(Messort_Code)
+
+
+  messort_ids_folder <- c(names(csv_paths_list_all_einzel), names(csv_paths_list_all_langzeit)) %>%
+    stringr::str_extract("\\d+") %>%
+    tibble("Messort_Code" = .) %>%
+    dplyr::mutate(Messort_Code = as.numeric(Messort_Code))
+
+  in_folder <- anti_join(messort_ids_folder, messort_ids_ogd)
+  in_ogd <- anti_join(messort_ids_ogd, messort_ids_folder)
+
+  if(nrow(in_folder) > 0){
+    cli::cli_abort("In der Ordnerstruktur sind Messorte IDs vorhanden welche nicht im Messorte.csv als OGD veröffentlicht sind.
+                   Dies sind die IDs: {in_folder$Messort_Code}")
+  } else if (nrow(in_ogd) > 0){
+    cli::cli_abort("In der OGD Ressource Messorte.csv sind Messorte IDs vorhanden welche nicht in der Ordnerstruktur gefunden wurden.
+                   Dies sind die IDs: {in_ogd$Messort_Code}")
+  } else {
+    cli::cli_alert_success("Jede Messorte ID aus der OGD Ressource Messorte.csv hat ein Match in der Ordnerstruktur.")
   }
+
+}
+
