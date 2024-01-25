@@ -53,13 +53,13 @@ extract <- function(delta_load = TRUE,
     }
 
     # report the delta
-    delta_report_einzel <- report_delta_einzel(existing_ogd, delta_paths_einzel)
-    delta_report_langzeit <- report_delta_langzeit(existing_ogd, delta_paths_langzeit)
+    delta_report_einzel <- report_delta_einzel(existing_ogd_list, delta_paths_einzel)
+    delta_report_langzeit <- report_delta_langzeit(existing_ogd_list, delta_paths_langzeit)
 
 
 
     # check the delta (and fail informatively if Messorte.csv OGD ressource is not up to date)
-    check_delta_vs_existing(existing_ogd$Messorte, delta_report_langzeit, delta_report_einzel)
+    check_delta_vs_existing(existing_ogd_list$Messorte, delta_report_langzeit, delta_report_einzel)
 
     # IF checks ran through: process the csv paths and read in data
     measurements_data_einzel <- process_csv_data_einzel(delta_paths_einzel)
@@ -95,7 +95,9 @@ extract <- function(delta_load = TRUE,
       bind_rows()
 
     # combine Langzeitmessungen & Einzelmessungen
-    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed)
+    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
+      dplyr::select(Zeitstempel,Messort_Code,fmin_hz,fmax_hz,service_name,value_v_m) %>% # change order of columns
+      dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 
 
     # write data to data/temp/extract/rohdaten_messwerte.csv
@@ -123,7 +125,6 @@ extract <- function(delta_load = TRUE,
 
     # state success!
     cli::cli_alert_success("Pfade zu Wiederholungsmessungsdaten wurden eingelesen!")
-
 
     # check if OGD Messorte & IDs in folder match -> break if not
     check_full_load(csv_paths_list_all_einzel, csv_paths_list_all_langzeit)
