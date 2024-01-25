@@ -3,7 +3,7 @@
 
 #'
 #' @examples transform()
-transform <- function(){
+transform <- function(full_load = TRUE){
 
 
   ##---------------------------------------------------------------------------
@@ -70,7 +70,7 @@ transform <- function(){
 
   # Lade lokales Rohdaten CSV File und lade es in ein Data Frame
   if(file.exists(path_rohdaten_messwerte)){
-    cli::cli_alert_info("Rohdaten CSV (lokal) wird eingelesen")
+    cli::cli_alert_info("Rohdaten CSV (lokal) wird eingelesen:")
     df_rohdaten_raw <- read.csv(path_rohdaten_messwerte) # Lade Rohdaten File, welches als Delta oder Full Load vorliegt
   }else{
     cli::cli_abort("Kein lokales Rohdaten CSV File verfügbar oder der Zugriff auf das File ist nicht möglich")
@@ -93,13 +93,20 @@ transform <- function(){
     cli::cli_abort("Messorte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
   }
 
-  # Erstelle Rohdaten Zip OGD File. Wird aus dem vom vorherigen Skript erzeugten CSV und dem OGD ZIP File erstellt.
-  # Füge OGD und prozessiertes Rohdaten Messwerte File zusammen
-  df_rohdaten <- rbind(df_rohdaten_raw, df_rohdaten_messwerte_ogd) %>%
-    dplyr::distinct()
+  # Erstelle Rohdaten dataframe. Wenn Full-Load ausgewählt, wird das geschriebene CSV aus dem Extract Skript direkt als Dataframe geladen
+  if(full_load == TRUE){
+    df_rohdaten <- df_rohdaten_raw %>%
+      dplyr::arrange(Messort_Code, Zeitstempel)
+  }else
+  {
+    # Füge OGD und prozessiertes Rohdaten Messwerte File zusammen
+    df_rohdaten <- rbind(df_rohdaten_raw, df_rohdaten_messwerte_ogd) %>%
+      dplyr::distinct() %>%
+      dplyr::arrange(Messort_Code, Jahr)
+  }
 
   cli::cli_alert_success("Rohdaten Zip (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
-
+  cli::cli_alert_info("Datum/Uhrzeit Spalten werden bereinigt:")
 
   ##---------------------------------------------------------------------------
   # 2. Schwellenwert-Bereinigung:
@@ -205,7 +212,7 @@ transform <- function(){
 
   #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
   dir.create(path_to_rohdaten_folder)
-  readr::write_csv(df_rohdaten, file = paste0(path_to_rohdaten_folder, rohdaten_messwerte_ogd_filename, ".csv"))
+  readr::write_csv(df_rohdaten, file = paste0(path_to_rohdaten_folder, rohdaten_messwerte_ogd_filename, ".csv"), )
 
   # Speichere Rohdaten File als Zip
   archive::archive_write_dir(archive = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip"), dir = path_to_rohdaten_folder)
