@@ -208,12 +208,13 @@ transform <- function(full_load = TRUE){
   #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
   dir.create(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename), recursive = TRUE, showWarnings = FALSE)
 
+  # Speichere alle Rohdaten in ein CSV File in den temporären Ordner, welcher später gezippt wird.
   readr::write_csv(df_rohdaten, file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/0_alle_rohdaten", ".csv"), )
 
   # Teile dataframe in nested dataframe
   split_df <- split(df_rohdaten, list(df_rohdaten$Messort_Code))
 
-  # Speichere die csv einzel
+  # Speichere zusätzlich die Rohdaten pro Messort in ein CSV-File in den temporären Ordner, welcher später gezippt wird.
   for (Messort_Code in  cli::cli_progress_along(names(split_df))) {
     Messort_Name <- df_messorte[df_messorte$Messort_Code == Messort_Code, 2]
     readr::write_csv(split_df[[Messort_Code]], file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/", Messort_Code, "_", Messort_Name, ".csv"), )
