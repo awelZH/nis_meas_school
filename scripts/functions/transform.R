@@ -206,7 +206,7 @@ transform <- function(full_load = TRUE){
 
   cli::cli_alert_info("Speichere Rohdaten lokal:")
   #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
-  dir.create(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename))
+  dir.create(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename), recursive = TRUE, showWarnings = FALSE)
 
   readr::write_csv(df_rohdaten, file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/0_alle_rohdaten", ".csv"), )
 
