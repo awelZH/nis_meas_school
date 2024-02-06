@@ -215,7 +215,7 @@ transform <- function(full_load = TRUE){
 
   # Speichere die csv einzel
   for (Messort_Code in  cli::cli_progress_along(names(split_df))) {
-    Messort_Name = df_messorte[df_messorte$Messort_Code == Messort_Code, 2]
+    Messort_Name <- df_messorte[df_messorte$Messort_Code == Messort_Code, 2]
     readr::write_csv(split_df[[Messort_Code]], file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/", Messort_Code, "_", Messort_Name, ".csv"), )
   }
   cli::cli_progress_done()
