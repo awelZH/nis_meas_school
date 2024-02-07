@@ -31,6 +31,8 @@ update <- function(){
   assertthat::assert_that(msg = "testmode` must be a boolean" , is.logical(testmode))
   assertthat::assert_that(msg = "titel_rohdaten_mdv` must be a character." , is.character(titel_rohdaten_mdv))
   assertthat::assert_that(msg = "titel_aufbereitete_daten_mdv` must be a character." , is.character(titel_aufbereitete_daten_mdv))
+  assertthat::assert_that(msg = "MDV Username fehlt im .Renviron File. Füge den Username der Variable mdv_user hinzu." , mdv_user != "")
+  assertthat::assert_that(msg = "MDV Passwort fehlt im .Renviron File. Füge das Passwort der Variable mdv_pw hinzu." , mdv_pw != "")
   assertthat::assert_that(msg = "mdv_user` must be a character." , is.character(mdv_user))
   assertthat::assert_that(msg = "mdv_pw` must be a character." , is.character(mdv_pw))
   assertthat::assert_that(msg = "path_rohdaten_messwerte` must be a character." , is.character(path_rohdaten_messwerte))
