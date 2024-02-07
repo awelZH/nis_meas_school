@@ -85,28 +85,28 @@ report_delta_langzeit <- function(existing_ogd, delta_langzeit) {
   }
 
   if (length(new_ids) > 0) {
-    cli_alert_info("Neue Messorte IDs in Ordnerstruktur welche noch nicht Teil der OGD Publikation sind:")
-    cli_ul()
-    cli_li(sprintf("{.strong %s}", paste(new_ids, collapse = ', ')))
+    cli::cli_alert_info("Neue Messorte IDs in Ordnerstruktur welche noch nicht Teil der OGD Publikation sind:")
+    cli::cli_ul()
+    cli:cli_li(sprintf("{.strong %s}", paste(new_ids, collapse = ', ')))
     if (length(ids_with_new_years) > 0) {
-      cli_text(sprintf("Neue Messungen für diese IDs für die Jahre %s",
+      cli::cli_text(sprintf("Neue Messungen für diese IDs für die Jahre %s",
                        paste(sapply(new_ids, function(id) paste(new_years_summary[[id]], collapse = ', ')),
                              collapse = ', ')))
     }
-    cli_end()
+    cli::cli_end()
   }
 
   if (length(ids_with_new_years) > 0) {
-    cli_alert_success("Neue Messungen in Ordnerstruktur für die vorhandenen IDs gefunden:")
-    cli_ul()
+    cli::cli_alert_success("Neue Messungen in Ordnerstruktur für die vorhandenen IDs gefunden:")
+    cli::cli_ul()
     for (id in ids_with_new_years) {
-      cli_li(sprintf("{.strong %s} für die Jahre %s", id, paste(new_years_summary[[id]], collapse = ', ')))
+      cli::cli_li(sprintf("{.strong %s} für die Jahre %s", id, paste(new_years_summary[[id]], collapse = ', ')))
     }
-    cli_end()
+    cli::cli_end()
   }
 
   if (length(new_ids) == 0 && length(ids_with_new_years) == 0) {
-    cli_alert_info("Keine neuen Messorte oder Messungen für vorhandene IDs in der Ordnerstruktur gefunden.")
+    cli::cli_alert_info("Keine neuen Messorte oder Messungen für vorhandene IDs in der Ordnerstruktur gefunden.")
   }
 
   # Create a tibble with the results
@@ -131,12 +131,12 @@ report_delta_einzel <- function(existing_ogd, delta_einzel) {
   new_ids <- setdiff(delta_ids, existing_ids)
 
   if (length(new_ids) > 0) {
-    cli_alert_info("Neue Messorte IDs in Ordnerstruktur welche noch nicht Teil der OGD Publikation sind:")
-    cli_ul()
+    cli::cli_alert_info("Neue Messorte IDs in Ordnerstruktur welche noch nicht Teil der OGD Publikation sind:")
+    cli::cli_ul()
     for (new_id in new_ids) {
-      cli_li(paste("{.strong", new_id, "}"))
+      cli::cli_li(paste("{.strong", new_id, "}"))
     }
-    cli_end()
+    cli::cli_end()
   }
 
   # Create a tibble with the results
@@ -166,6 +166,6 @@ check_delta_vs_existing <- function(existing_messorte, delta_langzeit, delta_ein
     cli_alert_success("Die OGD Ressource 'Messorte' scheint aktuell zu sein. Alle neuen Messungen in Ordnerstruktur finden sich in den Messorten wieder.")
   } else {
     # Error message if there are unmatched codes
-    cli_alert_error_message("Die OGD Ressource 'Messorte' scheint NICHT aktuell zu sein. Es gibt neue Dateien in der Ordnerstruktur welche keine Messort_ID zugeordnet haben in der OGD Ressource. Bitte OGD Ressource anpassen bevor ein delta-load vorgenommen wird.")
+   cli::cli_abort("Die OGD Ressource 'Messorte' scheint NICHT aktuell zu sein. Es gibt neue Dateien in der Ordnerstruktur welche keine Messort_ID zugeordnet haben in der OGD Ressource. Bitte OGD Ressource anpassen bevor ein delta-load vorgenommen wird.")
   }
 }
