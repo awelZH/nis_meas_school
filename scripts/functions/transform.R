@@ -64,7 +64,7 @@ transform <- function(full_load = TRUE){
     cli::cli_abort("Schwellenwerte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
   }
 
-   ##---------------------------------------------------------------------------
+  ##---------------------------------------------------------------------------
   # 1. Lade benötigte Daten und erstelle Zip OGD File
   ##---------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ transform <- function(full_load = TRUE){
   if(check_file_availability(url_rohdaten_messwerte)){
     # Lade OGD Rohdaten und speichere sie als CSV
     download.file(url_rohdaten_messwerte, paste0(path_to_transform_folder, "rohdaten_messwerte.zip"))
-    df_rohdaten_messwerte_ogd <- readr::read_csv(archive::archive_read(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip")), show_col_types = FALSE)
+    df_rohdaten_messwerte_ogd <- readr::read_csv(archive::archive_read(paste0(path_to_transform_folder, rohdaten_messwerte_ogd_filename, ".zip")), show_col_types = FALSE)
 
   }else{
     cli::cli_abort("Kein OGD Rohdaten File verfügbar oder der Zugriff auf das File ist nicht möglich")
@@ -97,12 +97,11 @@ transform <- function(full_load = TRUE){
   if(full_load == TRUE){
     df_rohdaten <- df_rohdaten_raw %>%
       dplyr::arrange(Messort_Code, Zeitstempel)
-  }else
-  {
+  }else{
     # Füge OGD und prozessiertes Rohdaten Messwerte File zusammen
     df_rohdaten <- rbind(df_rohdaten_raw, df_rohdaten_messwerte_ogd) %>%
       dplyr::distinct() %>%
-      dplyr::arrange(Messort_Code, Jahr)
+      dplyr::arrange(Messort_Code, Zeitstempel)
   }
 
   cli::cli_alert_success("Rohdaten Zip (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
@@ -205,20 +204,33 @@ transform <- function(full_load = TRUE){
   # 4. Speichere Daten als CSV und Zip
   ##---------------------------------------------------------------------------
 
+  cli::cli_alert_info("Speichere Rohdaten lokal:")
+  #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
+  dir.create(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename), recursive = TRUE, showWarnings = FALSE)
+
+  # Speichere alle Rohdaten in ein CSV File in den temporären Ordner, welcher später gezippt wird.
+  readr::write_csv(df_rohdaten, file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/0_alle_rohdaten", ".csv"), )
+
+  # Teile dataframe in nested dataframe
+  split_df <- split(df_rohdaten, list(df_rohdaten$Messort_Code))
+
+  # Speichere zusätzlich die Rohdaten pro Messort in ein CSV-File in den temporären Ordner, welcher später gezippt wird.
+  for (Messort_Code in  cli::cli_progress_along(names(split_df))) {
+    Messort_Name <- df_messorte[df_messorte$Messort_Code == Messort_Code, 2]
+    readr::write_csv(split_df[[Messort_Code]], file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/", Messort_Code, "_", Messort_Name, ".csv"), )
+  }
+  cli::cli_progress_done()
+
+  # Speichere Rohdaten File als Zip
+  archive::archive_write_dir(archive = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip"), dir = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename))
+
+  # Lösche temporärer Ordner
+  unlink(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename), recursive = TRUE)
+
   # Speichere aufbereites messwerte File als CSV
   readr::write_csv(df_final, file = paste0(path_to_load_folder, aufbereite_messwerte_ogd_filename, ".csv"))
 
   cli::cli_alert_success("aufbereitete_messwerte.csv wurde lokal gespeichert")
-
-  #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
-  dir.create(path_to_rohdaten_folder)
-  readr::write_csv(df_rohdaten, file = paste0(path_to_rohdaten_folder, rohdaten_messwerte_ogd_filename, ".csv"), )
-
-  # Speichere Rohdaten File als Zip
-  archive::archive_write_dir(archive = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip"), dir = path_to_rohdaten_folder)
-
-  # Lösche temporärer Ordner
-  unlink(path_to_rohdaten_folder, recursive = TRUE)
 
   cli::cli_alert_success("rohdaten_messwerte.zip wurde lokal gespeichert")
   cli::cli_alert_success("Transform Skript ist erfolgreich durchgelaufen")
