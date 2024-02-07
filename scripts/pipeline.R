@@ -7,10 +7,10 @@ source_files(path = "scripts/functions")
 update_project_from_github()
 
 #Set path to local files
-path_rohdaten_topfolder = "~/file-server/file-server/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/"
+path_rohdaten_topfolder <- "~/file-server/file-server/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/"
 
-full_load = FALSE
-delta_load = TRUE
+full_load <- FALSE
+delta_load <- TRUE
 # run the pipeline
 
 # Call the extract function
