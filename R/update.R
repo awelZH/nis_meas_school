@@ -8,7 +8,6 @@
 #' Bitte beachte, dass im .Renviron File die Variabeln: 'mdv_user', 'mdv_pw' und 'ZH_METADATEN_API_TOKEN' mit dazugehörigen Werten vorhanden ist.
 #'
 #'
-#' @examples update()
 #'
 update <- function(){
 

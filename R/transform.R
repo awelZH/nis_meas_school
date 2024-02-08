@@ -1,8 +1,6 @@
 #' Erstelle die beiden Messwerte OGD Files (rohdaten_messwerte.zip und aufbereitete_messwerte.csv)
 #' für die Visualisierung der Immissionsmessungen NIS im Kanton Zürich als OGD
 
-#'
-#' @examples transform()
 transform <- function(full_load = TRUE){
 
 

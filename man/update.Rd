@@ -21,7 +21,3 @@ Das OGD Dataset muss bereits in der Metadatenverwaltung angelegt sein und die ri
 Es braucht Schreibrechte im MDV, welche mit den dazugehörigen Username Passwort Kombination möglich ist (siehe nächste Linie). Ausserdem braucht man einen Token, um das neuste zhMetadatenAPI Package von Github herunterzuladen.
 Bitte beachte, dass im .Renviron File die Variabeln: 'mdv_user', 'mdv_pw' und 'ZH_METADATEN_API_TOKEN' mit dazugehörigen Werten vorhanden ist.
 }
-\examples{
-update()
-
-}
