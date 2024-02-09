@@ -1,12 +1,12 @@
 Package: nisMeasSchool
-Title: What the Package Does (One Line, Title Case)
+Title: Immissionsmessungen NIS im Kanton Zürich
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R: c(
+    person("Philipp", "Bosch", email = "philipp.bosch@statistik.ji.zh.ch", role = c("aut")),
+    person("Adrian", "Rupp", email = "adrian.rupp@statistik.ji.zh.ch", role = c("aut")),
+    person("Gian-Marco", "Alt", email = "gian-marco.alt@bd.zh.ch", role = c("cre")))
+Description: Packag um die ZH Web Visualisierung, den OGD Datensatz und Ressourcen der NIS Strahlungsmessung des Kantons Zürich zu aktualisieren.
+License: `use_mit_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
@@ -25,6 +25,7 @@ Imports:
     assertthat,
     zoo,
     archive,
+    httr,
     httr2,
     lubridate,
     stringr,
