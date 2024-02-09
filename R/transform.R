@@ -1,8 +1,11 @@
+#' Transform
+#'
 #' Erstelle die beiden Messwerte OGD Files (rohdaten_messwerte.zip und aufbereitete_messwerte.csv)
 #' für die Visualisierung der Immissionsmessungen NIS im Kanton Zürich als OGD
-
+#'
+#' @param full_load Boolean. Ob Full-Load ausgeführt werden sollte
+#'
 transform <- function(full_load = TRUE){
-
 
   ##---------------------------------------------------------------------------
   # 0. Parameter setzen und überprüfen

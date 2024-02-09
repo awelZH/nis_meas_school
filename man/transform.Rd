@@ -2,10 +2,12 @@
 % Please edit documentation in R/transform.R
 \name{transform}
 \alias{transform}
-\title{Erstelle die beiden Messwerte OGD Files (rohdaten_messwerte.zip und aufbereitete_messwerte.csv)
-für die Visualisierung der Immissionsmessungen NIS im Kanton Zürich als OGD}
+\title{Transform}
 \usage{
 transform(full_load = TRUE)
+}
+\arguments{
+\item{full_load}{Boolean. Ob Full-Load ausgeführt werden sollte}
 }
 \description{
 Erstelle die beiden Messwerte OGD Files (rohdaten_messwerte.zip und aufbereitete_messwerte.csv)
