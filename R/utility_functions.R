@@ -83,7 +83,6 @@ check_na_langzeitmessungen <- function(langzeitmessungen_list) {
 update_project_from_github <- function() {
   # Define the command to pull from the remote repository
   git_command <- "git pull origin main"
-  system("git config --global http.sslbackend schannel")
   # Run the command in the shell
   system(git_command, intern = TRUE)
 
