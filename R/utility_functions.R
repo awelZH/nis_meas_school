@@ -122,7 +122,7 @@ check_full_load <- function(csv_paths_list_all_einzel, csv_paths_list_all_langze
   in_ogd <- anti_join(messort_ids_ogd, messort_ids_folder)
 
   if(nrow(in_folder) > 0){
-    cli::cli_abort("In der Ordnerstruktur sind Messorte IDs vorhanden welche nicht im Messorte.csv als OGD veröffentlicht sind.
+    cli::cli_abort("In der Ordnerstruktur sind Messorte IDs vorhanden welche nicht im Messorte.csv als OGD veroeffentlicht sind.
                    Dies sind die IDs: {in_folder$Messort_Code}")
   } else if (nrow(in_ogd) > 0){
     cli::cli_abort("In der OGD Ressource Messorte.csv sind Messorte IDs vorhanden welche nicht in der Ordnerstruktur gefunden wurden.

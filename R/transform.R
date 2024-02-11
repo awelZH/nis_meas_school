@@ -1,40 +1,40 @@
 #' Transform
 #'
 #' Erstelle die beiden Messwerte OGD Files (rohdaten_messwerte.zip und aufbereitete_messwerte.csv)
-#' für die Visualisierung der Immissionsmessungen NIS im Kanton Zürich als OGD
+#' fuer die Visualisierung der Immissionsmessungen NIS im Kanton Zuerich als OGD
 #'
-#' @param full_load Boolean. Ob Full-Load ausgeführt werden sollte
+#' @param full_load Boolean. Ob Full-Load ausgefuehrt werden sollte
 #'
 transform <- function(full_load = TRUE){
 
   ##---------------------------------------------------------------------------
-  # 0. Parameter setzen und überprüfen
+  # 0. Parameter setzen und ueberpruefen
   ##---------------------------------------------------------------------------
   cli::cli_alert_info("Starte Transform Prozess")
 
   # Datenpfad als String zum Rohdaten File. Dieses File wurde im vorherigen Schritt erzeugt.
-  path_rohdaten_messwerte = "data/temp/extract/rohdaten_messwerte.csv"
+  path_rohdaten_messwerte = "inst/extdata/temp/extract/rohdaten_messwerte.csv"
   #URL zum Rohdaten Messwerte Zip File (OGD) als String
   url_rohdaten_messwerte <- 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00005003.zip'
   # URL zum Schwellenwert File als String
-  path_schwellenwerte <- 'data/frequenzbaender_schwellenwerte.csv'
+  path_schwellenwerte <- 'inst/extdata/frequenzbaender_schwellenwerte.csv'
   # URL zum Messorte OGD File als String
   url_messorte = 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv'
   type_rolling_mean <- 'center' # Wie der Rolling mean berechnet wird
-  rolling_mean_breite <- 60 # Wie viele Wertepro Wert im rolling mean berücksichtigt werden
+  rolling_mean_breite <- 60 # Wie viele Wertepro Wert im rolling mean beruecksichtigt werden
   Einheit_kurz <- "V/m" #Einheit der zu darzustellenden Werte (SI Einheiten) als String
   Einheit_lang <- "Volt pro Meter" #Einheit der zu darzustellenden Werte (ausgeschrieben) als String
   # Datenpfad als String wo alle Input Files von diesem Skript gespeichert werden
-  path_to_transform_folder <- "data/temp/transform/"
+  path_to_transform_folder <- "inst/extdata/temp/transform/"
   # Datenpfad als String wo alle Export Files von diesem Skript gespeichert werden
-  path_to_load_folder <- "data/temp/load/"
+  path_to_load_folder <- "inst/extdata/temp/load/"
   # Dateiname als String zum Rohdaten Messwerte File.
   aufbereite_messwerte_ogd_filename <- 'aufbereitete_messwerte'
   # Dateiname als String zum Rohdaten Messwerte File.
   rohdaten_messwerte_ogd_filename <- 'rohdaten_messwerte'
-  path_to_rohdaten_folder <- 'data/temp/transform/rohdaten/'
+  path_to_rohdaten_folder <- 'inst/extdata/temp/transform/rohdaten/'
 
-  # Überprüfe, ob die Parameter den richtigen Typ haben. Ansonsten breche ab und werfe Fehlermeldung
+  # ueberpruefe, ob die Parameter den richtigen Typ haben. Ansonsten breche ab und werfe Fehlermeldung
   assertthat::assert_that(msg = "path_rohdaten_messwerte` must be a character" , is.character(path_rohdaten_messwerte))
   assertthat::assert_that(msg = "url_rohdaten_messwerte` must be a character" , is.character(url_rohdaten_messwerte))
   assertthat::assert_that(msg = "path_schwellenwerte` must be a character" , is.character(path_schwellenwerte))
@@ -48,25 +48,25 @@ transform <- function(full_load = TRUE){
   assertthat::assert_that(msg = "rohdaten_messwerte_ogd_filename` must be a character." , is.character(rohdaten_messwerte_ogd_filename))
   assertthat::assert_that(msg = "path_to_rohdaten_folder` must be a character." , is.character(path_to_rohdaten_folder))
 
-  # Überprüfe, ob das Transform Verzeichnis verfügbar ist
+  # ueberpruefe, ob das Transform Verzeichnis verfuegbar ist
   if(!dir.exists(path_to_transform_folder)){
-    cli::cli_abort(paste0(path_to_transform_folder, " Verzeichnis nicht verfügbar oder der Zugriff auf das Verzeichnis ist nicht möglich"))
+    cli::cli_abort(paste0(path_to_transform_folder, " Verzeichnis nicht verfuegbar oder der Zugriff auf das Verzeichnis ist nicht moeglich"))
   }
 
-  # Überprüfe, ob das Load Verzeichnis verfügbar ist
+  # ueberpruefe, ob das Load Verzeichnis verfuegbar ist
   if(!dir.exists(path_to_load_folder)){
-    cli::cli_abort(paste0(path_to_load_folder, " Verzeichnis nicht verfügbar oder der Zugriff auf das Verzeichnis ist nicht möglich"))
+    cli::cli_abort(paste0(path_to_load_folder, " Verzeichnis nicht verfuegbar oder der Zugriff auf das Verzeichnis ist nicht moeglich"))
   }
 
   # Lade Schwellenwerte File und lade es in ein Data Frame
   if(file.exists(path_schwellenwerte)){
     df_schwellenwerte <- readr::read_csv(path_schwellenwerte, show_col_types = FALSE) # Lade Schwellenwerte File
   }else{
-    cli::cli_abort("Schwellenwerte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
+    cli::cli_abort("Schwellenwerte File nicht verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }
 
   ##---------------------------------------------------------------------------
-  # 1. Lade benötigte Daten und erstelle Zip OGD File
+  # 1. Lade benoetigte Daten und erstelle Zip OGD File
   ##---------------------------------------------------------------------------
 
   # Lade lokales Rohdaten CSV File und lade es in ein Data Frame
@@ -74,7 +74,7 @@ transform <- function(full_load = TRUE){
     cli::cli_alert_info("Rohdaten CSV (lokal) wird eingelesen:")
     df_rohdaten_raw <- read.csv(path_rohdaten_messwerte) # Lade Rohdaten File, welches als Delta oder Full Load vorliegt
   }else{
-    cli::cli_abort("Kein lokales Rohdaten CSV File verfügbar oder der Zugriff auf das File ist nicht möglich")
+    cli::cli_abort("Kein lokales Rohdaten CSV File verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }
 
   # Lade Rohdaten OGD ZIP File und lade es in ein Data Frame
@@ -84,28 +84,28 @@ transform <- function(full_load = TRUE){
     df_rohdaten_messwerte_ogd <- readr::read_csv(archive::archive_read(paste0(path_to_transform_folder, rohdaten_messwerte_ogd_filename, ".zip")), show_col_types = FALSE)
 
   }else{
-    cli::cli_abort("Kein OGD Rohdaten File verfügbar oder der Zugriff auf das File ist nicht möglich")
+    cli::cli_abort("Kein OGD Rohdaten File verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }
 
   # Lade Messorte OGD File und lade es in ein Data Frame
   if(check_file_availability(url_messorte)){
     df_messorte <- read.csv(url_messorte) # Lade Messorte File
   }else{
-    cli::cli_abort("Messorte File nicht verfügbar oder der Zugriff auf das File ist nicht möglich")
+    cli::cli_abort("Messorte File nicht verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }
 
-  # Erstelle Rohdaten dataframe. Wenn Full-Load ausgewählt, wird das geschriebene CSV aus dem Extract Skript direkt als Dataframe geladen
+  # Erstelle Rohdaten dataframe. Wenn Full-Load ausgewaehlt, wird das geschriebene CSV aus dem Extract Skript direkt als Dataframe geladen
   if(full_load == TRUE){
     df_rohdaten <- df_rohdaten_raw %>%
       dplyr::arrange(Messort_Code, Zeitstempel)
   }else{
-    # Füge OGD und prozessiertes Rohdaten Messwerte File zusammen
+    # Fuege OGD und prozessiertes Rohdaten Messwerte File zusammen
     df_rohdaten <- rbind(df_rohdaten_raw, df_rohdaten_messwerte_ogd) %>%
       dplyr::distinct() %>%
       dplyr::arrange(Messort_Code, Zeitstempel)
   }
 
-  cli::cli_alert_success("Rohdaten Zip (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefügt")
+  cli::cli_alert_success("Rohdaten Zip (OGD) wurden erfolgreich eingelesen und mit dem lokalen Rohdaten zu einem Dataset zusammengefuegt")
   cli::cli_alert_info("Datum/Uhrzeit Spalten werden bereinigt:")
 
   ##---------------------------------------------------------------------------
@@ -117,32 +117,32 @@ transform <- function(full_load = TRUE){
   #Zuerst werden Datum und Uhrzeit getrennt
   temp <- tidyr::separate(df_rohdaten, Zeitstempel, into = c("Datum", "Uhrzeit"), sep = "T")
 
-  # Da die Rohdaten verschiedene Formate in den Zeitstempel haben, werden mehrere Schritte ausgeführt, um am Schluss ein einheitliches Datum Uhrzeit Format für alle zu erhalten
+  # Da die Rohdaten verschiedene Formate in den Zeitstempel haben, werden mehrere Schritte ausgefuehrt, um am Schluss ein einheitliches Datum Uhrzeit Format fuer alle zu erhalten
   temp$datum1 <- as.Date(suppressWarnings(lubridate::parse_date_time(temp$Datum, c("dmY", "mdY")))) # Mit diesem Code werden die meisten Formate erkennt.
-  #Ein Format funktioniert nicht und muss im nächsten Schritt verarbeitet werden.
+  #Ein Format funktioniert nicht und muss im naechsten Schritt verarbeitet werden.
   temp$datum_corr <- as.Date(ifelse(is.na(temp$datum1), as.character(as.Date(temp$Datum, format = "%d.%m.%y")), as.character(temp$datum1)))
 
   # Erstelle eine Jahresspalte
   temp$Jahr <- format(temp$datum_corr, "%Y")
 
-  #Füge die korrigierte Datumspalte mit der Uhrzeitspalte zusammen um ein Timestamp zu erhalten.
+  #Fuege die korrigierte Datumspalte mit der Uhrzeitspalte zusammen um ein Timestamp zu erhalten.
   temp$Zeitstempel_corr <- paste0(as.character(temp$datum_corr), "T", as.character(temp$Uhrzeit))
 
-  #Wähle die relevanten Spalten aus
+  #Waehle die relevanten Spalten aus
   temp <- temp[c("Fmin_Hz", "Fmax_Hz", "Service_Name", "Value_V_per_m", "Messort_Code", "Jahr", "datum_corr", "Zeitstempel_corr")]
 
   # Formatiere die Datumspalten im Schwellenwerte Dataframe zu Datum
   df_schwellenwerte$gueltig_von <- as.Date(df_schwellenwerte$gueltig_von, "%d.%m.%Y")
   df_schwellenwerte$gueltig_bis <- as.Date(df_schwellenwerte$gueltig_bis, "%d.%m.%Y")
 
-  # In der Spalte gueltig_bis können NA vorkommen. Dort wo NA vorkommen, heisst das, das die Schwellenwerte immer noch gültig sind. Damit der spätere Join funktioniert,
-  # werden die NA mit dem aktuellen DAtum überschrieben.
+  # In der Spalte gueltig_bis koennen NA vorkommen. Dort wo NA vorkommen, heisst das, das die Schwellenwerte immer noch gueltig sind. Damit der spaetere Join funktioniert,
+  # werden die NA mit dem aktuellen DAtum ueberschrieben.
   df_schwellenwerte <- df_schwellenwerte %>%
     mutate(gueltig_bis = if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis))
 
-  cli::cli_alert_success("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgeführt")
+  cli::cli_alert_success("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgefuehrt")
 
-  # Merge Rohdaten mit Schwellenwerte Daten. Da ein Inner join gemacht wird, bleiben nur die Zeilen übrig, welche in beiden Dataframe vorkommen. Damit werden z.B alte Services wie "Others I",
+  # Merge Rohdaten mit Schwellenwerte Daten. Da ein Inner join gemacht wird, bleiben nur die Zeilen uebrig, welche in beiden Dataframe vorkommen. Damit werden z.B alte Services wie "Others I",
   # ausgeschlossen.
   by <- join_by(Fmin_Hz == Freq_min, Fmax_Hz == Freq_max, between(datum_corr, gueltig_von, gueltig_bis))
   df_merged <- inner_join(temp, df_schwellenwerte, by)
@@ -150,38 +150,38 @@ transform <- function(full_load = TRUE){
   # Zeige Anzahl nicht erfolgreiche Joins dem User an:
   number_of_anti_joins <- nrow(anti_join(temp, df_schwellenwerte, by))
 
-  # Speichere Kombinationen von Frequenzen und Jahr in einem Dataframe. Wird nicht für das Ausführen dieses Skript gebraucht, kann aber für Debug Zwecke gebraucht werden.
+  # Speichere Kombinationen von Frequenzen und Jahr in einem Dataframe. Wird nicht fuer das Ausfuehren dieses Skript gebraucht, kann aber fuer Debug Zwecke gebraucht werden.
   dataset <- anti_join(temp, df_schwellenwerte, by) %>%
     dplyr::distinct(Fmin_Hz, Fmax_Hz, Service_Name, Jahr) %>%
     dplyr::arrange(Fmin_Hz, Jahr)
 
   dataset
 
-  cli::cli_alert_info(paste0(number_of_anti_joins, " Messwerten konnte keine Schwellenwerte hinzugefügt werden."))
-  cli::cli_alert_success("Schwellenwerte wurden erfolgreich den Messwerten hinzugefügt", )
+  cli::cli_alert_info(paste0(number_of_anti_joins, " Messwerten konnte keine Schwellenwerte hinzugefuegt werden."))
+  cli::cli_alert_success("Schwellenwerte wurden erfolgreich den Messwerten hinzugefuegt", )
 
 
-  # Führe Schwellenwertkorrektur durch
+  # Fuehre Schwellenwertkorrektur durch
   df_merged$Value_V_per_m_corrected <- df_merged$Value_V_per_m - df_merged$Schwellenwert_MR_Vm
 
   # Ersetze die korrgierten Werte mit 0, wenn sie kleiner als 0 sind
   df_merged$Value_V_per_m_corrected <- ifelse(df_merged$Value_V_per_m_corrected < 0, 0, df_merged$Value_V_per_m_corrected)
 
-  cli::cli_alert_success("Schwellenwertbereinigung erfolgreich durchgeführt")
+  cli::cli_alert_success("Schwellenwertbereinigung erfolgreich durchgefuehrt")
 
   ##---------------------------------------------------------------------------
   # 3. Berechne rollierende Mittelwerte
   ##---------------------------------------------------------------------------
 
-  # Erstelle neues Dataframe, wo die einzelnen Frequenzbänder in die Kategorien quadratisch summiert und danach die Wurzel gezogen wird.
+  # Erstelle neues Dataframe, wo die einzelnen Frequenzbaender in die Kategorien quadratisch summiert und danach die Wurzel gezogen wird.
 
   # Berechne rollierender Mittelwert
   df_grouped_rolling <- df_merged %>%
     dplyr::group_by(Jahr, Messort_Code, Kategorie, Zeitstempel_corr) %>%
-    # summiert die quadrierten Argumente & gibt die Quadratwurzel einer Zahl zurück
+    # summiert die quadrierten Argumente & gibt die Quadratwurzel einer Zahl zurueck
     dplyr::summarise(value_grouped = sqrt(sum(Value_V_per_m_corrected^2)), .groups = "drop") %>%
     dplyr::ungroup() %>%
-    dplyr::group_by(Jahr, Messort_Code, Kategorie) %>% # Groupiere und berechne den rolling mean im nächsten Schritt pro Gruppe
+    dplyr::group_by(Jahr, Messort_Code, Kategorie) %>% # Groupiere und berechne den rolling mean im naechsten Schritt pro Gruppe
     dplyr::mutate(sixmin_avg = zoo::rollapply(value_grouped, rolling_mean_breite ,mean,align=type_rolling_mean,fill=NA))
 
 
@@ -192,30 +192,30 @@ transform <- function(full_load = TRUE){
     dplyr::summarise(Wert = max(sixmin_avg, na.rm = TRUE), .groups = "drop")
 
 
-  # Joine Information für finales Dataframe
+  # Joine Information fuer finales Dataframe
   df_final <- merge(df_grouped_max, df_messorte[c('Messort_Code', 'Messort_Name', 'Messintervall')], by.x = 'Messort_Code', by.y = 'Messort_Code') %>%
     mutate(Einheit_kurz = Einheit_kurz,
            Einheit_lang = Einheit_lang,
            Messgeraet_Typ = "SRM 3006") %>%
     select(Jahr, Messort_Code, Messort_Name, Service, Wert, Einheit_kurz, Einheit_lang, Messintervall, Messgeraet_Typ)
 
-  cli::cli_alert_success("Berechnung durchgeführt und weitere Informationen wurden hinzugefügt")
+  cli::cli_alert_success("Berechnung durchgefuehrt und weitere Informationen wurden hinzugefuegt")
 
   ##---------------------------------------------------------------------------
   # 4. Speichere Daten als CSV und Zip
   ##---------------------------------------------------------------------------
 
   cli::cli_alert_info("Speichere Rohdaten lokal:")
-  #Erstelle temporäres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
+  #Erstelle temporaeres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
   dir.create(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename), recursive = TRUE, showWarnings = FALSE)
 
-  # Speichere alle Rohdaten in ein CSV File in den temporären Ordner, welcher später gezippt wird.
+  # Speichere alle Rohdaten in ein CSV File in den temporaeren Ordner, welcher spaeter gezippt wird.
   readr::write_csv(df_rohdaten, file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/0_alle_rohdaten", ".csv"), )
 
   # Teile dataframe in nested dataframe
   split_df <- split(df_rohdaten, list(df_rohdaten$Messort_Code))
 
-  # Speichere zusätzlich die Rohdaten pro Messort in ein CSV-File in den temporären Ordner, welcher später gezippt wird.
+  # Speichere zusaetzlich die Rohdaten pro Messort in ein CSV-File in den temporaeren Ordner, welcher spaeter gezippt wird.
   for (Messort_Code in  cli::cli_progress_along(names(split_df))) {
     Messort_Name <- df_messorte[df_messorte$Messort_Code == Messort_Code, 2]
     readr::write_csv(split_df[[Messort_Code]], file = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, "/", Messort_Code, "_", Messort_Name, ".csv"), )
@@ -225,7 +225,7 @@ transform <- function(full_load = TRUE){
   # Speichere Rohdaten File als Zip
   archive::archive_write_dir(archive = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename, ".zip"), dir = paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename))
 
-  # Lösche temporärer Ordner
+  # Loesche temporaerer Ordner
   unlink(paste0(path_to_load_folder, rohdaten_messwerte_ogd_filename), recursive = TRUE)
 
   # Speichere aufbereites messwerte File als CSV

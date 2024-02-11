@@ -89,7 +89,7 @@ report_delta_langzeit <- function(existing_ogd, delta_langzeit) {
     cli_ul()
     cli_li(sprintf("{.strong %s}", paste(new_ids, collapse = ', ')))
     if (length(ids_with_new_years) > 0) {
-      cli_text(sprintf("Neue Messungen für diese IDs für die Jahre %s",
+      cli_text(sprintf("Neue Messungen fuer diese IDs fuer die Jahre %s",
                        paste(sapply(new_ids, function(id) paste(new_years_summary[[id]], collapse = ', ')),
                              collapse = ', ')))
     }
@@ -97,16 +97,16 @@ report_delta_langzeit <- function(existing_ogd, delta_langzeit) {
   }
 
   if (length(ids_with_new_years) > 0) {
-    cli_alert_success("Neue Messungen in Ordnerstruktur für die vorhandenen IDs gefunden:")
+    cli_alert_success("Neue Messungen in Ordnerstruktur fuer die vorhandenen IDs gefunden:")
     cli_ul()
     for (id in ids_with_new_years) {
-      cli_li(sprintf("{.strong %s} für die Jahre %s", id, paste(new_years_summary[[id]], collapse = ', ')))
+      cli_li(sprintf("{.strong %s} fuer die Jahre %s", id, paste(new_years_summary[[id]], collapse = ', ')))
     }
     cli_end()
   }
 
   if (length(new_ids) == 0 && length(ids_with_new_years) == 0) {
-    cli_alert_info("Keine neuen Messorte oder Messungen für vorhandene IDs in der Ordnerstruktur gefunden.")
+    cli_alert_info("Keine neuen Messorte oder Messungen fuer vorhandene IDs in der Ordnerstruktur gefunden.")
   }
 
   # Create a tibble with the results

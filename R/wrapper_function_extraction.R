@@ -4,11 +4,11 @@ extract <- function(delta_load = TRUE,
                     url_ogd_messwerte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
                     url_ogd_messorte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv") {
   # check for sanity of arguments
-  assert_that(!are_equal(delta_load, full_load), msg = "delta_load und full_load können nicht gleichen Wert (true/false) haben!")
+  assert_that(!are_equal(delta_load, full_load), msg = "delta_load und full_load koennen nicht gleichen Wert (true/false) haben!")
 
   assert_that(is.readable(path_rohdaten_topfolder), msg = "Pfad zu Rohdaten ist nicht vorhanden oder kein Zugriff!")
 
-  assert_that(is.writeable("data/temp/extract/"), msg = "Kann den Ordner 'data/temp/extract/ nicht öffnen. Ordner wird benötigt um Daten zwischenzuspeichern.")
+  assert_that(is.writeable("inst/extdata/temp/extract/"), msg = "Kann den Ordner 'inst/extdata/temp/extract/ nicht oeffnen. Ordner wird benoetigt um Daten zwischenzuspeichern.")
 
 
 
@@ -16,7 +16,7 @@ extract <- function(delta_load = TRUE,
     # check existing ogd ressources for Messorte & Jahre
 
 
-    cli::cli_alert_info("Delta Load wird durchgeführt.")
+    cli::cli_alert_info("Delta Load wird durchgefuehrt.")
 
     existing_ogd_list <- retrieve_existing_data(messwerte_url = url_ogd_messwerte,
                                                 messorte_url = url_ogd_messorte)
@@ -100,18 +100,18 @@ extract <- function(delta_load = TRUE,
       dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 
 
-    # write data to data/temp/extract/rohdaten_messwerte.csv
+    # write data to inst/extdata/temp/extract/rohdaten_messwerte.csv
 
-    vroom::vroom_write(x = combined_data, file = "data/temp/extract/rohdaten_messwerte.csv", delim = ",")
+    vroom::vroom_write(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
 
-    cli::cli_alert_success("Daten wurden in 'data/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
+    cli::cli_alert_success("Daten wurden in 'inst/extdata/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
 
   }
 
 
   if(full_load == TRUE){
 
-    cli::cli_alert_info("Full Load wird durchgeführt.")
+    cli::cli_alert_info("Full Load wird durchgefuehrt.")
 
     csv_paths_list_all_einzel <- extract_csv_paths_einzel(top_folder_path = fs::path(path_rohdaten_topfolder, "Schulhausmessungen"), num_dirs = Inf) %>%
       filter_csv_files_einzel()
@@ -168,11 +168,11 @@ extract <- function(delta_load = TRUE,
       dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 
 
-    # write data to data/temp/extract/rohdaten_messwerte.csv
+    # write data to inst/extdata/temp/extract/rohdaten_messwerte.csv
 
-    vroom::vroom_write(x = combined_data, file = "data/temp/extract/rohdaten_messwerte.csv", delim = ",")
+    vroom::vroom_write(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
 
-    cli::cli_alert_success("Daten wurden in 'data/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
+    cli::cli_alert_success("Daten wurden in 'inst/extdata/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
   }
 
 }
