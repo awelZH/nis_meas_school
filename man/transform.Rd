@@ -7,9 +7,9 @@
 transform(full_load = TRUE)
 }
 \arguments{
-\item{full_load}{Boolean. Ob Full-Load ausgeführt werden sollte}
+\item{full_load}{Boolean. Ob Full-Load ausgefuehrt werden sollte}
 }
 \description{
 Erstelle die beiden Messwerte OGD Files (rohdaten_messwerte.zip und aufbereitete_messwerte.csv)
-für die Visualisierung der Immissionsmessungen NIS im Kanton Zürich als OGD
+fuer die Visualisierung der Immissionsmessungen NIS im Kanton Zuerich als OGD
 }
