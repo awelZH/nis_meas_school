@@ -9,11 +9,10 @@ Description: Packag um die ZH Web Visualisierung, den OGD Datensatz und Ressourc
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.2.3
 Imports:
     cli,
     purrr,
-    stringr,
     vroom,
     janitor,
     readr,
