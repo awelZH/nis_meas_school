@@ -148,10 +148,10 @@ transform <- function(full_load = TRUE){
   df_merged <- inner_join(temp, df_schwellenwerte, by)
 
   # Zeige Anzahl nicht erfolgreiche Joins dem User an:
-  number_of_anti_joins <- nrow(anti_join(temp, df_schwellenwerte, by))
+  number_of_anti_joins <- nrow(dplyr::anti_join(temp, df_schwellenwerte, by))
 
   # Speichere Kombinationen von Frequenzen und Jahr in einem Dataframe. Wird nicht fuer das Ausfuehren dieses Skript gebraucht, kann aber fuer Debug Zwecke gebraucht werden.
-  dataset <- anti_join(temp, df_schwellenwerte, by) %>%
+  dataset <- dplyr::anti_join(temp, df_schwellenwerte, by) %>%
     dplyr::distinct(Fmin_Hz, Fmax_Hz, Service_Name, Jahr) %>%
     dplyr::arrange(Fmin_Hz, Jahr)
 

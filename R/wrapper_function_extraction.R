@@ -4,11 +4,11 @@ extract <- function(delta_load = TRUE,
                     url_ogd_messwerte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
                     url_ogd_messorte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv") {
   # check for sanity of arguments
-  assert_that(!are_equal(delta_load, full_load), msg = "delta_load und full_load koennen nicht gleichen Wert (true/false) haben!")
+  assertthat::assert_that(!assertthat::are_equal(delta_load, full_load), msg = "delta_load und full_load koennen nicht gleichen Wert (true/false) haben!")
 
-  assert_that(is.readable(path_rohdaten_topfolder), msg = "Pfad zu Rohdaten ist nicht vorhanden oder kein Zugriff!")
+  assertthat::assert_that(assertthat::is.readable(path_rohdaten_topfolder), msg = "Pfad zu Rohdaten ist nicht vorhanden oder kein Zugriff!")
 
-  assert_that(is.writeable("inst/extdata/temp/extract/"), msg = "Kann den Ordner 'inst/extdata/temp/extract/ nicht oeffnen. Ordner wird benoetigt um Daten zwischenzuspeichern.")
+  assertthat::assert_that(assertthat::is.writeable("inst/extdata/temp/extract/"), msg = "Kann den Ordner 'inst/extdata/temp/extract/ nicht oeffnen. Ordner wird benoetigt um Daten zwischenzuspeichern.")
 
 
 
@@ -75,27 +75,27 @@ extract <- function(delta_load = TRUE,
     # bind Einzelmessungen and Langzeitmessungen together
 
     einzelmessungen_processed <- measurements_data_einzel %>%
-      map(~ .x %>%
-            select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
-      bind_rows()
+      purrr::map(~ .x %>%
+            dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
+      dplyr::bind_rows()
 
     langzeitmessungen_processed <- measurements_data_langzeit %>%
-      map(\(messort_list) {
-        map(messort_list, \(year_list) {
-          map(year_list, \(df) {
+      purrr::map(\(messort_list) {
+        purrr::map(messort_list, \(year_list) {
+          purrr::map(year_list, \(df) {
             if (is.data.frame(df)) {
               df %>%
-                select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
+                dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
             }
           }) %>%
-            bind_rows()
+            dplyr::bind_rows()
         }) %>%
-          bind_rows()
+          dplyr::bind_rows()
       }) %>%
-      bind_rows()
+      dplyr::bind_rows()
 
     # combine Langzeitmessungen & Einzelmessungen
-    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
+    combined_data <- dplyr::bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
       dplyr::select(Zeitstempel,Messort_Code,fmin_hz,fmax_hz,service_name,value_v_m) %>% # change order of columns
       dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 
@@ -143,27 +143,27 @@ extract <- function(delta_load = TRUE,
     # bind Einzelmessungen and Langzeitmessungen together
 
     einzelmessungen_processed <- measurements_data_einzel %>%
-      map(~ .x %>%
-            select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
-      bind_rows()
+      purrr::map(~ .x %>%
+            dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
+      dplyr::bind_rows()
 
     langzeitmessungen_processed <- measurements_data_langzeit %>%
-      map(\(messort_list) {
-        map(messort_list, \(year_list) {
-          map(year_list, \(df) {
+      purrr::map(\(messort_list) {
+        purrr::map(messort_list, \(year_list) {
+          purrr::map(year_list, \(df) {
             if (is.data.frame(df)) {
               df %>%
-                select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
+                dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
             }
           }) %>%
-            bind_rows()
+            dplyr::bind_rows()
         }) %>%
-          bind_rows()
+          dplyr::bind_rows()
       }) %>%
-      bind_rows()
+      dplyr::bind_rows()
 
     # combine Langzeitmessungen & Einzelmessungen
-    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
+    combined_data <- dplyr::bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
       dplyr::select(Zeitstempel,Messort_Code,fmin_hz,fmax_hz,service_name,value_v_m) %>% # change order of columns
       dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 

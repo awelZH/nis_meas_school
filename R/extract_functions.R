@@ -12,15 +12,15 @@ extract_csv_paths_einzel <- function(top_folder_path, num_dirs = Inf) {
   total_folders <- length(daten_dirs)
   counter <- 1
 
-  paths_list <- map(daten_dirs, function(dir) {
+  paths_list <- purrr::map(daten_dirs, function(dir) {
     subfolders <- fs::dir_ls(dir, type = "directory")
     csv_files <- if (length(subfolders) > 0) {
-      map(subfolders, ~ fs::dir_ls(.x, glob = "*.csv")) %>% unlist()
+      purrr::map(subfolders, ~ fs::dir_ls(.x, glob = "*.csv")) %>% unlist()
     } else {
       fs::dir_ls(dir, glob = "*.csv")
     }
 
-    messort_code <- str_extract(dir, "\\d+_Daten")
+    messort_code <- stringr::str_extract(dir, "\\d+_Daten")
 
     # Print the current progress with messort_code
     cat(sprintf("Processing 'Messort': %s (%d out of %d)\n", messort_code, counter, total_folders))
@@ -29,7 +29,7 @@ extract_csv_paths_einzel <- function(top_folder_path, num_dirs = Inf) {
     list(csv_files = csv_files, messort_code = messort_code)
   })
 
-  names(paths_list) <- map_chr(daten_dirs, ~ str_extract(.x, "\\d+_Daten"))
+  names(paths_list) <- purrr::map_chr(daten_dirs, ~ stringr::str_extract(.x, "\\d+_Daten"))
   return(paths_list)
 }
 
@@ -50,8 +50,8 @@ extract_csv_paths_langzeit <- function(top_folder_path, num_dirs = Inf) {
   counter <- 1
 
   # Creating a nested list with Messorte as first level and years as second level
-  paths_list <- map(daten_dirs, function(dir) {
-    messort_code <- str_extract(basename(dir), "\\d+_Daten")
+  paths_list <- purrr::map(daten_dirs, function(dir) {
+    messort_code <- stringr::str_extract(basename(dir), "\\d+_Daten")
     year <- basename(dirname(dir))
     csv_files <- fs::dir_ls(dir, glob = "*.csv")
 
@@ -62,8 +62,8 @@ extract_csv_paths_langzeit <- function(top_folder_path, num_dirs = Inf) {
     list(year = year, csv_files = csv_files)
   }) %>%
     # Grouping by messort_code
-    split(map_chr(daten_dirs, ~ str_extract(basename(.x), "\\d+_Daten")))
+    split(purrr::map_chr(daten_dirs, ~ stringr::str_extract(basename(.x), "\\d+_Daten")))
 
   # Further nesting each messort_code group by year
-  map(paths_list, ~split(.x, map_chr(.x, "year")))
+  purrr::map(paths_list, ~split(.x, purrr::map_chr(.x, "year")))
 }

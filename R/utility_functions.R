@@ -1,12 +1,12 @@
 # Function to filter out HEADER CSV files
 filter_csv_files_einzel <- function(paths_list) {
   # Map function with preservation of names
-  map2(paths_list, names(paths_list), function(folder_info, name) {
+  purrr::map2(paths_list, names(paths_list), function(folder_info, name) {
     folder_info$csv_files <- folder_info$csv_files %>%
-      keep(~ !str_detect(.x, "_HEADER\\.csv"))
+      purrr::keep(~ !stringr::str_detect(.x, "_HEADER\\.csv"))
     # Set the name for each element
     setNames(folder_info, name)
-  }) %>% set_names(names(paths_list))
+  }) %>% purrr::set_names(names(paths_list))
 }
 
 
@@ -25,27 +25,27 @@ filter_csv_files_langzeit <- function(paths_list) {
 
   # Function to process each year within a 'Messort'
   process_year <- function(year) {
-    map(year, process_directory)
+    purrr::map(year, process_directory)
   }
 
   # Function to process each 'Messort'
   process_messort <- function(messort) {
-    map(messort, process_year)
+    purrr::map(messort, process_year)
   }
 
-  map(paths_list, process_messort)
+  purrr::map(paths_list, process_messort)
 }
 
 
 # check for NA Einzeldaten
 check_na_einzelmessungen <- function(einzelmessungen_list) {
-  na_containing_dfs <- map(einzelmessungen_list, \(df, name) {
+  na_containing_dfs <- purrr::map(einzelmessungen_list, \(df, name) {
     if (any(is.na(df$value_v_m))) {
       return(name)
     }
     NULL
   }, name = names(einzelmessungen_list)) %>%
-    compact() %>%
+    purrr::compact() %>%
     unlist()
 
   return(na_containing_dfs)
@@ -115,11 +115,11 @@ check_full_load <- function(csv_paths_list_all_einzel, csv_paths_list_all_langze
 
   messort_ids_folder <- c(names(csv_paths_list_all_einzel), names(csv_paths_list_all_langzeit)) %>%
     stringr::str_extract("\\d+") %>%
-    tibble("Messort_Code" = .) %>%
+    tibble::tibble("Messort_Code" = .) %>%
     dplyr::mutate(Messort_Code = as.numeric(Messort_Code))
 
-  in_folder <- anti_join(messort_ids_folder, messort_ids_ogd)
-  in_ogd <- anti_join(messort_ids_ogd, messort_ids_folder)
+  in_folder <- dplyr::anti_join(messort_ids_folder, messort_ids_ogd)
+  in_ogd <- dplyr::anti_join(messort_ids_ogd, messort_ids_folder)
 
   if(nrow(in_folder) > 0){
     cli::cli_abort("In der Ordnerstruktur sind Messorte IDs vorhanden welche nicht im Messorte.csv als OGD veroeffentlicht sind.
