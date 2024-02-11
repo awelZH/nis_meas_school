@@ -138,14 +138,14 @@ transform <- function(full_load = TRUE){
   # In der Spalte gueltig_bis koennen NA vorkommen. Dort wo NA vorkommen, heisst das, das die Schwellenwerte immer noch gueltig sind. Damit der spaetere Join funktioniert,
   # werden die NA mit dem aktuellen DAtum ueberschrieben.
   df_schwellenwerte <- df_schwellenwerte %>%
-    mutate(gueltig_bis = if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis))
+    dplyr::mutate(gueltig_bis = dplyr::if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis))
 
   cli::cli_alert_success("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgefuehrt")
 
   # Merge Rohdaten mit Schwellenwerte Daten. Da ein Inner join gemacht wird, bleiben nur die Zeilen uebrig, welche in beiden Dataframe vorkommen. Damit werden z.B alte Services wie "Others I",
   # ausgeschlossen.
-  by <- join_by(Fmin_Hz == Freq_min, Fmax_Hz == Freq_max, between(datum_corr, gueltig_von, gueltig_bis))
-  df_merged <- inner_join(temp, df_schwellenwerte, by)
+  by <- dplyr::join_by(Fmin_Hz == Freq_min, Fmax_Hz == Freq_max, between(datum_corr, gueltig_von, gueltig_bis))
+  df_merged <- dplyr::inner_join(temp, df_schwellenwerte, by)
 
   # Zeige Anzahl nicht erfolgreiche Joins dem User an:
   number_of_anti_joins <- nrow(dplyr::anti_join(temp, df_schwellenwerte, by))
@@ -187,17 +187,17 @@ transform <- function(full_load = TRUE){
 
   # Bilde Mittelwerte
   df_grouped_max <- df_grouped_rolling %>%
-    rename('Service' = "Kategorie") %>%
+    dplyr::rename('Service' = "Kategorie") %>%
     dplyr::group_by(Jahr, Messort_Code, Service) %>%
     dplyr::summarise(Wert = max(sixmin_avg, na.rm = TRUE), .groups = "drop")
 
 
   # Joine Information fuer finales Dataframe
   df_final <- merge(df_grouped_max, df_messorte[c('Messort_Code', 'Messort_Name', 'Messintervall')], by.x = 'Messort_Code', by.y = 'Messort_Code') %>%
-    mutate(Einheit_kurz = Einheit_kurz,
+    dplyr::mutate(Einheit_kurz = Einheit_kurz,
            Einheit_lang = Einheit_lang,
            Messgeraet_Typ = "SRM 3006") %>%
-    select(Jahr, Messort_Code, Messort_Name, Service, Wert, Einheit_kurz, Einheit_lang, Messintervall, Messgeraet_Typ)
+    dplyr::select(Jahr, Messort_Code, Messort_Name, Service, Wert, Einheit_kurz, Einheit_lang, Messintervall, Messgeraet_Typ)
 
   cli::cli_alert_success("Berechnung durchgefuehrt und weitere Informationen wurden hinzugefuegt")
 
