@@ -4,8 +4,8 @@ retrieve_existing_data <- function(messwerte_url = "https://www.web.statistik.zh
                                    messorte_url = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv"){
 
 
-  messwerte_df <- vroom::vroom(messwerte_url, show_col_types = FALSE)
-  messorte_df <- vroom::vroom(messorte_url, show_col_types = FALSE)
+  messwerte_df <- readr::read_delim(messwerte_url, show_col_types = FALSE)
+  messorte_df <- readr::read_delim(messorte_url, show_col_types = FALSE)
 
 
   messwerte_df %>%
