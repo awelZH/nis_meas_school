@@ -102,7 +102,7 @@ extract <- function(delta_load = TRUE,
 
     # write data to inst/extdata/temp/extract/rohdaten_messwerte.csv
 
-    vroom::vroom_write(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
+    readr::write_delim(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
 
     cli::cli_alert_success("Daten wurden in 'inst/extdata/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
 
@@ -170,7 +170,7 @@ extract <- function(delta_load = TRUE,
 
     # write data to inst/extdata/temp/extract/rohdaten_messwerte.csv
 
-    vroom::vroom_write(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
+    readr::write_delim(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
 
     cli::cli_alert_success("Daten wurden in 'inst/extdata/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
   }
