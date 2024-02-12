@@ -1,14 +1,26 @@
+#' function to start the whole extraction process
+#'
+#' @param delta_load boolean indicating if a delta load should be performed
+#' @param full_load boolean indicating if a full load should be performed
+#' @param path_rohdaten_topfolder character vector (string) pointing to folder where Measurement data is stored on local machine
+#' @param url_ogd_messwerte character vector (string) representing URL to OGD Messwerte Ressource
+#' @param url_ogd_messorte character vector (string) representing URL to OGD Messorte Ressource
+#'
+#' @return writes rohdaten_messwerte.csv into inst/extdata/temp/extract/
+#' @export
+#'
+#'
 extract <- function(delta_load = TRUE,
                     full_load = FALSE,
                     path_rohdaten_topfolder,
                     url_ogd_messwerte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
                     url_ogd_messorte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv") {
   # check for sanity of arguments
-  assert_that(!are_equal(delta_load, full_load), msg = "delta_load und full_load können nicht gleichen Wert (true/false) haben!")
+  assertthat::assert_that(!assertthat::are_equal(delta_load, full_load), msg = "delta_load und full_load koennen nicht gleichen Wert (true/false) haben!")
 
-  assert_that(is.readable(path_rohdaten_topfolder), msg = "Pfad zu Rohdaten ist nicht vorhanden oder kein Zugriff!")
+  assertthat::assert_that(assertthat::is.readable(path_rohdaten_topfolder), msg = "Pfad zu Rohdaten ist nicht vorhanden oder kein Zugriff!")
 
-  assert_that(is.writeable("data/temp/extract/"), msg = "Kann den Ordner 'data/temp/extract/ nicht öffnen. Ordner wird benötigt um Daten zwischenzuspeichern.")
+  assertthat::assert_that(assertthat::is.writeable("inst/extdata/temp/extract/"), msg = "Kann den Ordner 'inst/extdata/temp/extract/ nicht oeffnen. Ordner wird benoetigt um Daten zwischenzuspeichern.")
 
 
 
@@ -16,7 +28,7 @@ extract <- function(delta_load = TRUE,
     # check existing ogd ressources for Messorte & Jahre
 
 
-    cli::cli_alert_info("Delta Load wird durchgeführt.")
+    cli::cli_alert_info("Delta Load wird durchgefuehrt.")
 
     existing_ogd_list <- retrieve_existing_data(messwerte_url = url_ogd_messwerte,
                                                 messorte_url = url_ogd_messorte)
@@ -75,43 +87,43 @@ extract <- function(delta_load = TRUE,
     # bind Einzelmessungen and Langzeitmessungen together
 
     einzelmessungen_processed <- measurements_data_einzel %>%
-      map(~ .x %>%
-            select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
-      bind_rows()
+      purrr::map(~ .x %>%
+            dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
+      dplyr::bind_rows()
 
     langzeitmessungen_processed <- measurements_data_langzeit %>%
-      map(\(messort_list) {
-        map(messort_list, \(year_list) {
-          map(year_list, \(df) {
+      purrr::map(\(messort_list) {
+        purrr::map(messort_list, \(year_list) {
+          purrr::map(year_list, \(df) {
             if (is.data.frame(df)) {
               df %>%
-                select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
+                dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
             }
           }) %>%
-            bind_rows()
+            dplyr::bind_rows()
         }) %>%
-          bind_rows()
+          dplyr::bind_rows()
       }) %>%
-      bind_rows()
+      dplyr::bind_rows()
 
     # combine Langzeitmessungen & Einzelmessungen
-    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
+    combined_data <- dplyr::bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
       dplyr::select(Zeitstempel,Messort_Code,fmin_hz,fmax_hz,service_name,value_v_m) %>% # change order of columns
       dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 
 
-    # write data to data/temp/extract/rohdaten_messwerte.csv
+    # write data to inst/extdata/temp/extract/rohdaten_messwerte.csv
 
-    vroom::vroom_write(x = combined_data, file = "data/temp/extract/rohdaten_messwerte.csv", delim = ",")
+    readr::write_delim(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
 
-    cli::cli_alert_success("Daten wurden in 'data/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
+    cli::cli_alert_success("Daten wurden in 'inst/extdata/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
 
   }
 
 
   if(full_load == TRUE){
 
-    cli::cli_alert_info("Full Load wird durchgeführt.")
+    cli::cli_alert_info("Full Load wird durchgefuehrt.")
 
     csv_paths_list_all_einzel <- extract_csv_paths_einzel(top_folder_path = fs::path(path_rohdaten_topfolder, "Schulhausmessungen"), num_dirs = Inf) %>%
       filter_csv_files_einzel()
@@ -143,36 +155,36 @@ extract <- function(delta_load = TRUE,
     # bind Einzelmessungen and Langzeitmessungen together
 
     einzelmessungen_processed <- measurements_data_einzel %>%
-      map(~ .x %>%
-            select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
-      bind_rows()
+      purrr::map(~ .x %>%
+            dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)) %>%
+      dplyr::bind_rows()
 
     langzeitmessungen_processed <- measurements_data_langzeit %>%
-      map(\(messort_list) {
-        map(messort_list, \(year_list) {
-          map(year_list, \(df) {
+      purrr::map(\(messort_list) {
+        purrr::map(messort_list, \(year_list) {
+          purrr::map(year_list, \(df) {
             if (is.data.frame(df)) {
               df %>%
-                select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
+                dplyr::select(fmin_hz, fmax_hz, service_name, value_v_m, Zeitstempel, Messort_Code)
             }
           }) %>%
-            bind_rows()
+            dplyr::bind_rows()
         }) %>%
-          bind_rows()
+          dplyr::bind_rows()
       }) %>%
-      bind_rows()
+      dplyr::bind_rows()
 
     # combine Langzeitmessungen & Einzelmessungen
-    combined_data <- bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
+    combined_data <- dplyr::bind_rows(einzelmessungen_processed, langzeitmessungen_processed) %>%
       dplyr::select(Zeitstempel,Messort_Code,fmin_hz,fmax_hz,service_name,value_v_m) %>% # change order of columns
       dplyr::rename(Fmin_Hz = fmin_hz, Fmax_Hz = fmax_hz, Service_Name = service_name, Value_V_per_m = value_v_m)
 
 
-    # write data to data/temp/extract/rohdaten_messwerte.csv
+    # write data to inst/extdata/temp/extract/rohdaten_messwerte.csv
 
-    vroom::vroom_write(x = combined_data, file = "data/temp/extract/rohdaten_messwerte.csv", delim = ",")
+    readr::write_delim(x = combined_data, file = "inst/extdata/temp/extract/rohdaten_messwerte.csv", delim = ",")
 
-    cli::cli_alert_success("Daten wurden in 'data/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
+    cli::cli_alert_success("Daten wurden in 'inst/extdata/temp/extract/rohdaten_messwerte.csv' abgespeichert.")
   }
 
 }

@@ -1,7 +1,1 @@
-source_files <- function(path, pattern = "\\.R$") {
-  # List all files in the specified path
-  all_files <- list.files(path, pattern = pattern, full.names = TRUE)
-
-  # Source each file
-  sapply(all_files, source)
-}
+cli::cli_alert_info("Bitte überprüfe, ob den Pfad ('path_rohdaten_topfolder') und Variabeln ('full_load' und 'delta_load') im scripts/pipeline.R Skript richtig gesetzt sind. Passe sie vor dem Ausführen des Skripts ggfs. noch an." )

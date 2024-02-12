@@ -1,23 +1,20 @@
-# pipeline
+#### Definiere Variablen ==========================================================
 
-# source the packages and functions
-source_files(path = "scripts/functions")
+#Definiere Pfad, wo Rohdaten lokal liegen
+path_rohdaten_topfolder <- "/home/file-server/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/"
 
-# pull the newest changes of git-repo
-update_project_from_github()
+# Entscheide ob ein Full oder Delta Load gemacht werden sollte
+full_load <- T
+delta_load <- F
 
-#Set path to local files
-path_rohdaten_topfolder <- "~/file-server/file-server/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/"
+devtools::load_all()
+#### Führe Berechnung und OGD Upload durch ==========================================================
 
-full_load <- FALSE
-delta_load <- TRUE
-# run the pipeline
+# Lade alle benötigten Daten
+nisMeasSchool::extract(full_load = full_load, delta_load = delta_load, path_rohdaten_topfolder = path_rohdaten_topfolder)
 
-# Call the extract function
-extract(full_load = full_load, delta_load = delta_load, path_rohdaten_topfolder = path_rohdaten_topfolder)
+# Führe Berechnung durch
+nisMeasSchool::transform(full_load = full_load)
 
-# Call the transform function
-transform(full_load = full_load)
-
-# Call the update function
-update()
+# Lade OGD Daten hoch
+nisMeasSchool::update()

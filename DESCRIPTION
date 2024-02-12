@@ -1,0 +1,31 @@
+Package: nisMeasSchool
+Title: Immissionsmessungen NIS im Kanton Zuerich
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Philipp", "Bosch", email = "philipp.bosch@statistik.ji.zh.ch", role = c("aut")),
+    person("Adrian", "Rupp", email = "adrian.rupp@statistik.ji.zh.ch", role = c("aut")),
+    person("Gian-Marco", "Alt", email = "gian-marco.alt@bd.zh.ch", role = c("cre")))
+Description: Package um die ZH Web Visualisierung, den OGD Datensatz und Ressourcen der NIS Strahlungsmessung des Kantons Zuerich zu aktualisieren.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports:
+    cli,
+    purrr,
+    janitor,
+    readr,
+    dplyr,
+    fs,
+    data.table,
+    tibble,
+    assertthat,
+    zoo,
+    archive,
+    httr,
+    lubridate,
+    stringr,
+    tidyr,
+    magrittr
+Remotes:
+    statistikZH/zhMetadatenAPI
