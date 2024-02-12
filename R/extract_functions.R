@@ -1,7 +1,15 @@
-# extract file paths to csv for Einzeldaten
+#' function to generate a list of csv paths (Einzelmessungen)
+#'
+#' @param top_folder_path character string representing the file path to the folder where Langzeitmessungen & Einzelmessunge are located
+#' @param num_dirs number of (sub)-directories to process. Default = `Inf` which means all directories. Useful for testing purposes
+#'
+#' @return list with paths to csv files
+#'
+#'
+#'
 extract_csv_paths_einzel <- function(top_folder_path, num_dirs = Inf) {
   daten_dirs <- fs::dir_ls(top_folder_path, recurse = TRUE, glob = "*Daten") %>%
-    head(num_dirs)
+    utils::head(num_dirs)
 
   if (length(daten_dirs) == 0) {
     cat("Found 0 'Daten' directories under", top_folder_path, "\n")
@@ -35,10 +43,18 @@ extract_csv_paths_einzel <- function(top_folder_path, num_dirs = Inf) {
 
 
 
-# extract langzeit paths
+#' function to generate a list of csv paths (Langzeitmessungen)
+#'
+#' @param top_folder_path character string representing the file path to the folder where Langzeitmessungen & Einzelmessunge are located
+#' @param num_dirs number of (sub)-directories to process. Default = `Inf` which means all directories. Useful for testing purposes
+#'
+#' @return list with paths to csv files
+#'
+#'
+#'
 extract_csv_paths_langzeit <- function(top_folder_path, num_dirs = Inf) {
   daten_dirs <- fs::dir_ls(top_folder_path, recurse = TRUE, glob = "*_Daten") %>%
-    head(num_dirs)
+    utils::head(num_dirs)
 
   if (length(daten_dirs) == 0) {
     cat("Found 0 '_Daten' directories under", top_folder_path, "\n")

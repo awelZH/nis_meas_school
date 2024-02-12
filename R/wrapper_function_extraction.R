@@ -1,3 +1,15 @@
+#' function to start the whole extraction process
+#'
+#' @param delta_load boolean indicating if a delta load should be performed
+#' @param full_load boolean indicating if a full load should be performed
+#' @param path_rohdaten_topfolder character vector (string) pointing to folder where Measurement data is stored on local machine
+#' @param url_ogd_messwerte character vector (string) representing URL to OGD Messwerte Ressource
+#' @param url_ogd_messorte character vector (string) representing URL to OGD Messorte Ressource
+#'
+#' @return writes rohdaten_messwerte.csv into inst/extdata/temp/extract/
+#' @export
+#'
+#'
 extract <- function(delta_load = TRUE,
                     full_load = FALSE,
                     path_rohdaten_topfolder,

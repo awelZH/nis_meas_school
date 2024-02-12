@@ -1,5 +1,12 @@
-# function to get existing data from ogd ressource
-
+#' function to retrieve the existing OGD Data
+#'
+#' @param messwerte_url character vector with URL pointing to OGD ressource "Aufbereitete Messwerte"
+#' @param messorte_url character vector with URL pointing to OGD ressource "Messorte"
+#'
+#' @return list with three elements: "Einzelmessungen", "Langzeitmessungen" & Messorte. All objects are dataframes and are needed for the delta check
+#'
+#'
+#'
 retrieve_existing_data <- function(messwerte_url = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
                                    messorte_url = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv"){
 
@@ -30,7 +37,15 @@ retrieve_existing_data <- function(messwerte_url = "https://www.web.statistik.zh
 
 
 
-# function to clean einzeldaten (only returns Messorte which are "new" in the folder structure)
+#' function to delete already available measurement IDs from a list (Einzelmessungen)
+#'
+#' @param csv_list list with folder/path names
+#' @param id_list list with ids (from OGD ressource)
+#'
+#' @return a "cleaned" list which only contains IDs which are not already present in the OGD ressource
+#'
+#'
+#'
 clean_einzel_list <- function(csv_list, id_list) {
   # Convert id_list to numeric for matching
   id_list <- as.numeric(id_list)
@@ -47,7 +62,15 @@ clean_einzel_list <- function(csv_list, id_list) {
 }
 
 
-# function to clean langzeitdaten (only returns Messorte/Years which are "new" in the folder structure)
+#' function to delete already available measurement IDs from a list (Langzeitmessungen)
+#'
+#' @param csv_list list with folder/path names
+#' @param df_nested_list list with ids (from OGD ressource)
+#'
+#' @return a "cleaned" list which only contains IDs which are not already present in the OGD ressource
+#'
+#'
+#'
 clean_langzeit_list <- function(csv_list, df_nested_list) {
   # Process the names to extract Messort_Code
   names(csv_list) <- stringr::str_extract(names(csv_list), "\\d+")
@@ -66,7 +89,16 @@ clean_langzeit_list <- function(csv_list, df_nested_list) {
 }
 
 
-# function to report the delta for langzeitdaten
+
+#' function to report the delta between the existing ODG data and the measurement data in a folder (Langzeitmessungen)
+#'
+#' @param existing_ogd list with existing ogd - produced by [retrieve_existing_data()])
+#' @param delta_langzeit list with delta langzeit (new Langzeit data in folder)
+#'
+#' @return invisbly returns a tibble with the delta - prints always output to the console
+#'
+#'
+#'
 report_delta_langzeit <- function(existing_ogd, delta_langzeit) {
   existing_ids <- names(existing_ogd$Langzeitmessungen)
   delta_ids <- names(delta_langzeit)
@@ -123,7 +155,14 @@ report_delta_langzeit <- function(existing_ogd, delta_langzeit) {
   invisible(result)
 }
 
-# function to report the delta for einzelmessungen
+#' function to report the delta between the existing ODG data and the measurement data in a folder (Einzelmessungen)
+#'
+#' @param existing_ogd list with existing ogd - produced by [retrieve_existing_data()])
+#' @param delta_einzel list with delta einzel (new Einzelmessungen data in folder)
+#'
+#' @return invisbly returns a tibble with the delta - prints always output to the console
+#'
+#'
 report_delta_einzel <- function(existing_ogd, delta_einzel) {
   existing_ids <- names(existing_ogd$Einzelmessungen)
   delta_ids <- names(delta_einzel)
@@ -146,7 +185,16 @@ report_delta_einzel <- function(existing_ogd, delta_einzel) {
   invisible(result)
 }
 
-# Function to check if the online resource has been updated
+#' function to check the delta between OGD Ressources online and measurement data in the folder (fails informatively)
+#'
+#' @param existing_messorte list with existing ogd - produced by [retrieve_existing_data()])
+#' @param delta_langzeit list with delta Langzeit (new Langzeitmessungen data in folder)
+#' @param delta_einzel list with delta einzel (new Einzelmessungen data in folder)
+#'
+#' @return print statements in console about status of delta
+#'
+#'
+#'
 check_delta_vs_existing <- function(existing_messorte, delta_langzeit, delta_einzel) {
   # Get Messort_Codes from the existing Messorte
   existing_codes <- existing_messorte$Messort_Code

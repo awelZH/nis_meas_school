@@ -74,7 +74,7 @@ transform <- function(full_load = TRUE){
   # Lade lokales Rohdaten CSV File und lade es in ein Data Frame
   if(file.exists(path_rohdaten_messwerte)){
     cli::cli_alert_info("Rohdaten CSV (lokal) wird eingelesen:")
-    df_rohdaten_raw <- read.csv(path_rohdaten_messwerte) # Lade Rohdaten File, welches als Delta oder Full Load vorliegt
+    df_rohdaten_raw <- utils::read.csv(path_rohdaten_messwerte) # Lade Rohdaten File, welches als Delta oder Full Load vorliegt
   }else{
     cli::cli_abort("Kein lokales Rohdaten CSV File verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }
@@ -82,7 +82,7 @@ transform <- function(full_load = TRUE){
   # Lade Rohdaten OGD ZIP File und lade es in ein Data Frame
   if(check_file_availability(url_rohdaten_messwerte)){
     # Lade OGD Rohdaten und speichere sie als CSV
-    download.file(url_rohdaten_messwerte, paste0(path_to_transform_folder, "rohdaten_messwerte.zip"))
+    utils::download.file(url_rohdaten_messwerte, paste0(path_to_transform_folder, "rohdaten_messwerte.zip"))
     df_rohdaten_messwerte_ogd <- readr::read_csv(archive::archive_read(paste0(path_to_transform_folder, rohdaten_messwerte_ogd_filename, ".zip")), show_col_types = FALSE)
 
   }else{
@@ -91,7 +91,7 @@ transform <- function(full_load = TRUE){
 
   # Lade Messorte OGD File und lade es in ein Data Frame
   if(check_file_availability(url_messorte)){
-    df_messorte <- read.csv(url_messorte) # Lade Messorte File
+    df_messorte <- utils::read.csv(url_messorte) # Lade Messorte File
   }else{
     cli::cli_abort("Messorte File nicht verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }

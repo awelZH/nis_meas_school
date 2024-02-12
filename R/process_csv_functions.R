@@ -1,4 +1,11 @@
-# processing the data for Einzeldaten
+#' function to read in a list of csv paths (Einzelmessungen)
+#'
+#' @param filtered_paths_list list with file paths to csv files - produced by [extract_csv_paths_einzel()])
+#'
+#' @return nested list object which contains the actual measurement data as separate dataframes
+#'
+#'
+#'
 process_csv_data_einzel <- function(filtered_paths_list) {
   total_folders <- length(filtered_paths_list)
   counter <- 1
@@ -38,7 +45,13 @@ process_csv_data_einzel <- function(filtered_paths_list) {
 }
 
 
-# function to process langzeit data
+#' function to read in a list of csv paths (Langzeitmessungen)
+#'
+#' @param filtered_paths_list list with file paths to csv files - produced by [extract_csv_paths_einzel()])
+#'
+#' @return nested list object which contains the actual measurement data as separate dataframes
+#'
+#'
 process_csv_data_langzeit <- function(filtered_paths_list) {
   total_messorte <- length(filtered_paths_list)
   messort_counter <- 1

@@ -1,16 +1,30 @@
-# Function to filter out HEADER CSV files
+#' Function to filter out HEADER CSV files (Einzelmessungen)
+#'
+#' @param paths_list list with paths to csv files
+#'
+#' @return cleaned list with paths to csv files
+#'
+#'
+#'
 filter_csv_files_einzel <- function(paths_list) {
   # Map function with preservation of names
   purrr::map2(paths_list, names(paths_list), function(folder_info, name) {
     folder_info$csv_files <- folder_info$csv_files %>%
       purrr::keep(~ !stringr::str_detect(.x, "_HEADER\\.csv"))
     # Set the name for each element
-    setNames(folder_info, name)
+    stats::setNames(folder_info, name)
   }) %>% purrr::set_names(names(paths_list))
 }
 
 
-
+#' Function to filter out HEADER CSV files (Langzeitmessungen)
+#'
+#' @param paths_list list with paths to csv files
+#'
+#' @return cleaned list with paths to csv files
+#'
+#'
+#'
 filter_csv_files_langzeit <- function(paths_list) {
   # Helper function to filter out HEADER CSV files
   filter_header_csv <- function(csv_files) {
@@ -37,7 +51,14 @@ filter_csv_files_langzeit <- function(paths_list) {
 }
 
 
-# check for NA Einzeldaten
+#' Utility function to check for NAs (Einzelmessungen)
+#'
+#' @param einzelmessungen_list list with paths to csv files
+#'
+#' @return if any NAs are found: list with IDs
+#'
+#'
+#'
 check_na_einzelmessungen <- function(einzelmessungen_list) {
   na_containing_dfs <- purrr::map(einzelmessungen_list, \(df, name) {
     if (any(is.na(df$value_v_m))) {
@@ -52,7 +73,14 @@ check_na_einzelmessungen <- function(einzelmessungen_list) {
 }
 
 
-# check for NA Langzeitmessungen
+#' Utility function to check for NAs (Langzeitmessungen)
+#'
+#' @param langzeitmessungen_list list with paths to csv files
+#'
+#' @return if any NAs are found: list with IDs
+#'
+#'
+#'
 check_na_langzeitmessungen <- function(langzeitmessungen_list) {
   na_containing_paths <- c()
 
@@ -77,7 +105,14 @@ check_na_langzeitmessungen <- function(langzeitmessungen_list) {
 }
 
 
-# Check if File is available from URL
+#' Utility funciton to check if File is available from URL
+#'
+#' @param file_url string pointing to OGD Ressource URL
+#'
+#' @return boolean if file is available
+#'
+#'
+#'
 check_file_availability <- function(file_url) {
   # Send a HEAD request to the URL
   response <- httr::HEAD(file_url)
@@ -91,7 +126,15 @@ check_file_availability <- function(file_url) {
 }
 
 
-# function to check if files in folder and ogd_messorte are same (full load)
+#' function to check if files in folder and ogd_messorte are same (full load)
+#'
+#' @param csv_paths_list_all_einzel list with paths to csv files for Einzelmessungen
+#' @param csv_paths_list_all_langzeit list with paths to csv files for Langzeitmessungen
+#'
+#' @return console output if everything went fine. Fails informatively if differences occur.
+#'
+#'
+#'
 check_full_load <- function(csv_paths_list_all_einzel, csv_paths_list_all_langzeit){
 
   # get messorte IDs from OGD ressource
