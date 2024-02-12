@@ -5,6 +5,8 @@
 #'
 #' @param full_load Boolean. Ob Full-Load ausgefuehrt werden sollte
 #'
+#'@export
+#'
 transform <- function(full_load = TRUE){
 
   ##---------------------------------------------------------------------------

@@ -7,6 +7,8 @@
 #' Es braucht Schreibrechte im MDV, welche mit den dazugehoerigen Username Passwort Kombination moeglich ist (siehe naechste Linie). Ausserdem braucht man einen Token, um das neuste zhMetadatenAPI Package von Github herunterzuladen.
 #' Bitte beachte, dass im .Renviron File die Variabeln: 'mdv_user', 'mdv_pw' und 'ZH_METADATEN_API_TOKEN' mit dazugehoerigen Werten vorhanden ist.
 #'
+#'@export
+#'
 update <- function(){
 
   ##---------------------------------------------------------------------------
