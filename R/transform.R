@@ -159,6 +159,11 @@ transform <- function(full_load = TRUE){
 
   dataset
 
+  # Speichere Daten in Rohdaten Dataframe. Dieses wird im letzten Schritt dann zu dem Zip verarbeitet.
+  df_rohdaten <- df_merged[c("Zeitstempel_corr", "Messort_Code", "Fmin_Hz", "Fmax_Hz", "Service_Name", "Value_V_per_m")] %>%
+    dplyr::rename("Zeitstempel" = "Zeitstempel_corr") %>%
+    dplyr::arrange(Messort_Code, Zeitstempel)
+
   cli::cli_alert_info(paste0(number_of_anti_joins, " Messwerten konnte keine Schwellenwerte hinzugefuegt werden."))
   cli::cli_alert_success("Schwellenwerte wurden erfolgreich den Messwerten hinzugefuegt", )
 
