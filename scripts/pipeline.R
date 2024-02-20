@@ -1,7 +1,7 @@
 #### Definiere Variablen ==========================================================
 
 #Definiere Pfad, wo Rohdaten lokal liegen
-path_rohdaten_topfolder <- paste0(get_location(),"08_DS/01_Projekte/AWEL/2023_Schulhausmessung/")
+path_rohdaten_topfolder <- "L:/STAT/08_DS/01_Projekte/AWEL/2023_Schulhausmessung/"
 
 # Entscheide ob ein Full oder Delta Load gemacht werden sollte
 full_load <- TRUE
