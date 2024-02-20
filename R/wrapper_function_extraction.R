@@ -20,7 +20,7 @@ extract <- function(delta_load = TRUE,
 
   assertthat::assert_that(assertthat::is.readable(path_rohdaten_topfolder), msg = "Pfad zu Rohdaten ist nicht vorhanden oder kein Zugriff!")
 
-  assertthat::assert_that(assertthat::is.writeable("inst/extdata/temp/extract/"), msg = "Kann den Ordner 'inst/extdata/temp/extract/ nicht oeffnen. Ordner wird benoetigt um Daten zwischenzuspeichern.")
+  assertthat::assert_that(assertthat::is.readable("inst/extdata/temp/extract/"), msg = "Kann den Ordner 'inst/extdata/temp/extract/ nicht oeffnen. Ordner wird benoetigt um Daten zwischenzuspeichern.")
 
 
 
