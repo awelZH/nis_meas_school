@@ -54,7 +54,7 @@ update <- function(){
   ##---------------------------------------------------------------------------
 
   # Lade File in den MDV hoch
-  try(zhMetadatenAPI::update_distribution(user=mdv_user,
+  zhMetadatenAPI::update_distribution(user=mdv_user,
                                           pw=mdv_pw,
                                           distribution_id = ressourcen_id_rohdaten,
                                           file_path = path_rohdaten_messwerte,
@@ -64,7 +64,7 @@ update <- function(){
                                           stat_server_flag = "true",
                                           status = 1, # ACHTUNG: Um direkt zu publizieren, muss status=3 gesetzt werden
                                           right_id = 2,
-                                          testmode = testmode))
+                                          testmode = testmode)
 
   ##---------------------------------------------------------------------------
   # 2.2 Update Aufbereitetes Messwerte File
@@ -76,7 +76,7 @@ update <- function(){
 
 
   # Lade File in den MDV hoch
-  try(zhMetadatenAPI::update_distribution(user=mdv_user,
+  zhMetadatenAPI::update_distribution(user=mdv_user,
                                           pw=mdv_pw,
                                           distribution_id = ressourcen_id_aufbereitete_daten,
                                           file_path = path_aufbereitetem_file,
@@ -88,7 +88,7 @@ update <- function(){
                                           stat_server_flag = "true",
                                           status = 1, # ACHTUNG: Um direkt zu publizieren, muss status=3 gesetzt werden
                                           right_id = 2,
-                                          testmode = testmode))
+                                          testmode = testmode)
 
   cli::cli_alert_success("Update Skript ist erfolgreich durchgelaufen")
 
