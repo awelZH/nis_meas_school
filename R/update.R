@@ -16,7 +16,6 @@ update <- function(){
   ##---------------------------------------------------------------------------
   cli::cli_alert_info("Starte Update Prozess")
 
-  dataset_id <- 6436
   testmode <- FALSE # boolean, testmode = FALSE bedeutet, dass die Files auf das Produktive MDV geladen werden
   ressourcen_id_aufbereitete_daten <-4983 # ID der Rohdaten Ressourcen im MDV
   ressourcen_id_rohdaten <- 5003 # ID der Aufbereitete Daten Ressourcen im MDV
@@ -26,10 +25,9 @@ update <- function(){
   path_aufbereitetem_file <- "inst/extdata/temp/load/aufbereitete_messwerte.csv" # Datenpfad (lokal) als String zum Aufbereiteten CSV File
 
   # Überprüfe, ob die Argumente der Funktion sind im richtigen Datenformat. Ansonsten breche ab und werfe Fehlermeldung
-  assertthat::assert_that(msg = "dataset_id` must be numeric" , is.numeric(dataset_id))
   assertthat::assert_that(msg = "testmode` must be a boolean" , is.logical(testmode))
-  assertthat::assert_that(msg = "ressourcen_id_aufbereitete_daten` must be numeric" , is.numeric(ressourcen_id_aufbereitete_daten))
-  assertthat::assert_that(msg = "ressourcen_id_rohdaten` must be numeric" , is.numeric(ressourcen_id_rohdaten))
+  assertthat::assert_that(msg = "ressourcen_id_aufbereitete_daten` must be integer" , is.count(ressourcen_id_aufbereitete_daten))
+  assertthat::assert_that(msg = "ressourcen_id_rohdaten` must be integer" , is.count(ressourcen_id_rohdaten))
   assertthat::assert_that(msg = "MDV Username fehlt im .Renviron File. Füge den Username der Variable mdv_user hinzu." , mdv_user != "")
   assertthat::assert_that(msg = "MDV Passwort fehlt im .Renviron File. Füge das Passwort der Variable mdv_pw hinzu." , mdv_pw != "")
   assertthat::assert_that(msg = "mdv_user` must be a character." , is.character(mdv_user))
