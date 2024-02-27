@@ -218,7 +218,7 @@ transform <- function(full_load = TRUE){
   # 4. Speichere Daten als CSV und Zip
   ##---------------------------------------------------------------------------
 
-  #Exportiere die Kombinationen in ein File. Damit kann später herausgefunden werden, für welche Kombinationen es keinen Match gegeben hat.
+  #Exportiere die Kombinationen in ein File. Damit kann später herausgefunden werden, welche Messorte prozessiert und als OGD publiziert wurden.
   sink('prozessierte_messorte.txt')
   unique(df_final[c("Messort_Code", "Messort_Name")])
   sink()
