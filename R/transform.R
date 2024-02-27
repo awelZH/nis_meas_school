@@ -14,6 +14,9 @@ transform <- function(full_load = TRUE){
   ##---------------------------------------------------------------------------
   cli::cli_alert_info("Starte Transform Prozess")
 
+  # Verhindere wissenschaftliche Darstellung von Zahlen
+  options(scipen=999)
+
   # Datenpfad als String zum Rohdaten File. Dieses File wurde im vorherigen Schritt erzeugt.
   path_rohdaten_messwerte = "inst/extdata/temp/extract/rohdaten_messwerte.csv"
   #URL zum Rohdaten Messwerte Zip File (OGD) als String
@@ -154,10 +157,13 @@ transform <- function(full_load = TRUE){
 
   # Speichere Kombinationen von Frequenzen und Jahr in einem Dataframe. Wird nicht fuer das Ausfuehren dieses Skript gebraucht, kann aber fuer Debug Zwecke gebraucht werden.
   dataset <- dplyr::anti_join(temp, df_schwellenwerte, by) %>%
-    dplyr::distinct(Fmin_Hz, Fmax_Hz, Service_Name, Jahr) %>%
+    dplyr::distinct(Fmin_Hz, Fmax_Hz, Service_Name, Jahr, Messort_Code) %>%
     dplyr::arrange(Fmin_Hz, Jahr)
 
+  #Exportiere die Kombinationen in ein File. Damit kann später herausgefunden werden, für welche Kombinationen es keinen Match gegeben hat.
+  sink('nicht_prozessierte_messwerte.txt')
   dataset
+  sink()
 
   # Speichere Daten in Rohdaten Dataframe. Dieses wird im letzten Schritt dann zu dem Zip verarbeitet.
   df_rohdaten <- df_merged[c("Zeitstempel_corr", "Messort_Code", "Fmin_Hz", "Fmax_Hz", "Service_Name", "Value_V_per_m")] %>%
@@ -211,6 +217,11 @@ transform <- function(full_load = TRUE){
   ##---------------------------------------------------------------------------
   # 4. Speichere Daten als CSV und Zip
   ##---------------------------------------------------------------------------
+
+  #Exportiere die Kombinationen in ein File. Damit kann später herausgefunden werden, für welche Kombinationen es keinen Match gegeben hat.
+  sink('prozessierte_messorte.txt')
+  unique(df_final[c("Messort_Code", "Messort_Name")])
+  sink()
 
   cli::cli_alert_info("Speichere Rohdaten lokal:")
   #Erstelle temporaeres Verzeichnis und speichere CSV in Verzeichnis. Dieses Verzeichnis wird danach gezippt
