@@ -162,7 +162,7 @@ transform <- function(full_load = TRUE){
 
   #Exportiere die Kombinationen in ein File. Damit kann später herausgefunden werden, für welche Kombinationen es keinen Match gegeben hat.
   sink('nicht_prozessierte_messwerte.txt')
-  dataset
+  print(dataset)
   sink()
 
   # Speichere Daten in Rohdaten Dataframe. Dieses wird im letzten Schritt dann zu dem Zip verarbeitet.
@@ -220,7 +220,7 @@ transform <- function(full_load = TRUE){
 
   #Exportiere die Kombinationen in ein File. Damit kann später herausgefunden werden, welche Messorte prozessiert und als OGD publiziert wurden.
   sink('prozessierte_messorte.txt')
-  unique(df_final[c("Messort_Code", "Messort_Name")])
+  print(unique(df_final[c("Messort_Code", "Messort_Name")]))
   sink()
 
   cli::cli_alert_info("Speichere Rohdaten lokal:")
