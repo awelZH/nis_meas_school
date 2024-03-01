@@ -26,6 +26,8 @@ Anleitung zum die aktuellste Version herunterzuladen:
 2. Drücke auf "Pull" damit die aktuellste Version heruntergeladen wird
 ![image](https://github.com/awelZH/nis_meas_school/assets/46460424/de3ca1f4-a765-4b4d-884a-3100554951cb)
 
+### Hilfe:
+> Nach jedem Ausführen des [pipeline.R](scripts/pipeline.R) Skripts werden zwei CSV-Files (prozessierte_messorte.txt, nicht_prozessierte_messwerte.txt) erstellt. In diesen beiden Dateien finden man Informationen, welche Messorte prozessiert wurden und welche Messwerte nicht prozessiert wurden. Es ist good-practice, nach jedem Ausführen des pipeline.R-Skripts, den Inhalt dieser beiden CSV-Files zu überprüfen.
 
 ### Szenario 1: OGD Rohdaten und Messwerte um neue Messwerte aktualisieren (inkl. Aktualisieren der Visualisierungen im ZHWeb)
 To do:
