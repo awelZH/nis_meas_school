@@ -4,9 +4,7 @@ Repository um die ZH Web Visualisierung, den OGD Datensatz und Ressourcen der NI
 
 ## Setup
 
-1.  Clone das Repository an einen Ort, wo der Zugriff auf die Rohdaten gegeben ist und R-Skripte ausführbar sind. Entweder über den [klassischen download des
-    Repos](https://github.com/awelZH/nis_meas_school/archive/refs/heads/main.zip)
-    oder einen [direkten Download in der R-Studio
+1.  Clone das Repository an einen Ort, wo der Zugriff auf die Rohdaten gegeben ist und R-Skripte ausführbar sind. Anleitung zum Clonen in R-Studio: [direkten Download in der R-Studio
     Benutzeroberfläche.](https://happygitwithr.com/rstudio-git-github.html#clone-the-test-github-repository-to-your-computer-via-rstudio)
 2.  Stelle sicher, dass in der .Renviron Datei die benötigten Variablen (mdv_user, mdv_pw, ZH_METADATEN_API_TOKEN) vorhanden sind.
 3.  Damit die benötigten Packages von Github geladen werden können, muss bei Windows Systemen in der entsprechenden .gitconfig folgendes Statement enthalten sein:
@@ -17,6 +15,7 @@ Repository um die ZH Web Visualisierung, den OGD Datensatz und Ressourcen der NI
 
 -   **Login-Daten** für die **Metadatenveraltung (MDV)** sind vorhanden. Um ein Login für die MDV zu erhalten muss die Schulung für Data Stewards besucht werden. [Anmeldung zur MDV-Schulung](https://www.zh.ch/de/politik-staat/opendata/leitlinien.html)
 -   In der **MDV** ist der zu aktualisierende Datensatz und die Ressourcen bereits vorhanden.
+-   Zugriff auf die Messdaten lokal. 
 -   Es wird ein Token benötigt, um das [zhMetadatenAPI](https://github.com/statistikZH/zhMetadatenAPI/tree/master) Package von Github herunterladen zu können. Dieser kann bei der Fach- und Koordinationsstelle OGD bestellt werden [info\@open.zh.ch](mailto:info@open.zh.ch){.email}.
 
 ## Szenarien
