@@ -15,11 +15,12 @@ usethis::edit_r_environ()
 
 3.  Damit die benötigten Packages von Github geladen werden können, muss bei Windows Systemen in der entsprechenden .gitconfig folgendes Statement enthalten sein:
 
+> system("git config --global http.sslbackend schannel")
+
 Auch hier kann dir ein Befehl helfen:
 ``` r
 usethis::edit_git_config()
 ```
-> system("git config --global http.sslbackend schannel")
 
 ## Voraussetzungen ✔️
 
