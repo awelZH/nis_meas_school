@@ -60,7 +60,7 @@ update <- function(){
                                           ogd_flag = "true", # auf opendata.swiss publizieren
                                           zhweb_flag = "true", # auf zh.ch/opendata
                                           stat_server_flag = "true",
-                                          status = 1, # ACHTUNG: Um direkt zu publizieren, muss status=3 gesetzt werden
+                                          status = 3, # ACHTUNG: Um direkt zu publizieren, muss status=3 gesetzt werden
                                           right_id = 2,
                                           testmode = testmode)
 
@@ -84,7 +84,7 @@ update <- function(){
                                           ogd_flag = "true", # auf opendata.swiss publizieren
                                           zhweb_flag = "true", # auf zh.ch/opendata
                                           stat_server_flag = "true",
-                                          status = 1, # ACHTUNG: Um direkt zu publizieren, muss status=3 gesetzt werden
+                                          status = 3, # ACHTUNG: Um direkt zu publizieren, muss status=3 gesetzt werden
                                           right_id = 2,
                                           testmode = testmode)
 
