@@ -144,6 +144,10 @@ transform <- function(full_load = TRUE){
   # werden die NA mit dem aktuellen DAtum ueberschrieben.
   df_schwellenwerte <- df_schwellenwerte %>%
     dplyr::mutate(gueltig_bis = dplyr::if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis))
+  # Ergaenzung GMA, 2024-12-04: ab Juni 2024 gibt es drei zusätzliche Eintraege:
+  # Amateur/ISM433 | PMR/PAMR | Wetter Radar CH -> diese drei Eintraege werden vorderhand nicht mitberücksichtigt
+  df_schwellenwerte <- df_schwellenwerte %>%
+    filter(!is.na(Kategorie))
 
   cli::cli_alert_success("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgefuehrt")
 
