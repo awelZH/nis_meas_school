@@ -1,1 +1,1 @@
-cli::cli_alert_info("Bitte überprüfe, ob den Pfad ('path_rohdaten_topfolder') und Variabeln ('full_load' und 'delta_load') im scripts/pipeline.R Skript richtig gesetzt sind. Passe sie vor dem Ausführen des Skripts ggfs. noch an." )
+cli::cli_alert_info("Bitte überprüfe, ob der Pfad ('path_rohdaten_topfolder') und die Variabeln ('full_load' und 'delta_load') im scripts/pipeline.R Skript richtig gesetzt sind. Passe sie vor dem Ausführen des Skripts ggfs. noch an." )
