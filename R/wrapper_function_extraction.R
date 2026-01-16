@@ -13,8 +13,8 @@
 extract <- function(delta_load = TRUE,
                     full_load = FALSE,
                     path_rohdaten_topfolder,
-                    url_ogd_messwerte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
-                    url_ogd_messorte = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv") {
+                    url_ogd_messwerte = "https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
+                    url_ogd_messorte = "https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv") {
   # check for sanity of arguments
   assertthat::assert_that(!assertthat::are_equal(delta_load, full_load), msg = "delta_load und full_load koennen nicht gleichen Wert (true/false) haben!")
 

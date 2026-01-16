@@ -7,8 +7,8 @@
 #'
 #'
 #'
-retrieve_existing_data <- function(messwerte_url = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
-                                   messorte_url = "https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv"){
+retrieve_existing_data <- function(messwerte_url = "https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004983.csv",
+                                   messorte_url = "https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv"){
 
 
   messwerte_df <- readr::read_delim(messwerte_url, show_col_types = FALSE)

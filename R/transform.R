@@ -20,11 +20,11 @@ transform <- function(full_load = TRUE){
   # Datenpfad als String zum Rohdaten File. Dieses File wurde im vorherigen Schritt erzeugt.
   path_rohdaten_messwerte = "inst/extdata/temp/extract/rohdaten_messwerte.csv"
   #URL zum Rohdaten Messwerte Zip File (OGD) als String
-  url_rohdaten_messwerte <- 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00005003.zip'
+  url_rohdaten_messwerte <- 'https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00005003.zip'
   # URL zum Schwellenwert File als String
   path_schwellenwerte <- 'inst/extdata/frequenzbaender_schwellenwerte.csv'
   # URL zum Messorte OGD File als String
-  url_messorte = 'https://www.web.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv'
+  url_messorte = 'https://daten.statistik.zh.ch/ogd/daten/ressourcen/KTZH_00002462_00004924.csv'
   type_rolling_mean <- 'center' # Wie der Rolling mean berechnet wird
   rolling_mean_breite <- 60 # Wie viele Wertepro Wert im rolling mean beruecksichtigt werden
   Einheit_kurz <- "V/m" #Einheit der zu darzustellenden Werte (SI Einheiten) als String
@@ -37,6 +37,7 @@ transform <- function(full_load = TRUE){
   aufbereite_messwerte_ogd_filename <- 'aufbereitete_messwerte'
   # Dateiname als String zum Rohdaten Messwerte File.
   rohdaten_messwerte_ogd_filename <- 'rohdaten_messwerte'
+  # path_to_rohdaten_folder <- 'inst/extdata/temp/transform/rohdaten/'
   path_to_rohdaten_folder <- 'inst/extdata/temp/transform/rohdaten/'
 
   # ueberpruefe, ob die Parameter den richtigen Typ haben. Ansonsten breche ab und werfe Fehlermeldung
@@ -63,9 +64,15 @@ transform <- function(full_load = TRUE){
     cli::cli_abort(paste0(path_to_load_folder, " Verzeichnis nicht verfuegbar oder der Zugriff auf das Verzeichnis ist nicht moeglich"))
   }
 
-  # Lade Schwellenwerte File und lade es in ein Data Frame
+  # Lade Schwellenwerte File, lade es in ein Data Frame und gib formate mit
   if(file.exists(path_schwellenwerte)){
-    df_schwellenwerte <- readr::read_csv(path_schwellenwerte, show_col_types = FALSE) # Lade Schwellenwerte File
+    df_schwellenwerte <- readr::read_csv(
+      path_schwellenwerte,
+      col_types = cols(gueltig_von = col_date(format = "%Y-%m-%d"),
+                       gueltig_bis = col_date(format = "%Y-%m-%d")
+                       ),
+      show_col_types = FALSE
+      ) # Lade Schwellenwerte File
   }else{
     cli::cli_abort("Schwellenwerte File nicht verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }
@@ -142,12 +149,11 @@ transform <- function(full_load = TRUE){
 
   # In der Spalte gueltig_bis koennen NA vorkommen. Dort wo NA vorkommen, heisst das, das die Schwellenwerte immer noch gueltig sind. Damit der spaetere Join funktioniert,
   # werden die NA mit dem aktuellen DAtum ueberschrieben.
-  df_schwellenwerte <- df_schwellenwerte %>%
-    dplyr::mutate(gueltig_bis = dplyr::if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis))
   # Ergaenzung GMA, 2024-12-04: ab Juni 2024 gibt es drei zusätzliche Eintraege:
-  # Amateur/ISM433 | PMR/PAMR | Wetter Radar CH -> diese drei Eintraege werden vorderhand nicht mitberücksichtigt
+  # Amateur/ISM433 | PMR/PAMR | Wetter Radar CH -> diese drei Eintraege werden vorderhand nicht mitberücksichtigt -> is.na(Kategorie)
   df_schwellenwerte <- df_schwellenwerte %>%
-    filter(!is.na(Kategorie))
+    dplyr::mutate(gueltig_bis = dplyr::if_else(is.na(gueltig_bis), Sys.Date(), gueltig_bis)) %>%
+    dplyr::filter(!is.na(Kategorie))
 
   cli::cli_alert_success("Bereinigung der Datum Uhrzeit Spalten wurde erfolgreich durchgefuehrt")
 
@@ -177,7 +183,6 @@ transform <- function(full_load = TRUE){
   cli::cli_alert_info(paste0(number_of_anti_joins, " Messwerten konnte keine Schwellenwerte hinzugefuegt werden."))
   cli::cli_alert_success("Schwellenwerte wurden erfolgreich den Messwerten hinzugefuegt", )
 
-
   # Fuehre Schwellenwertkorrektur durch
   df_merged$Value_V_per_m_corrected <- df_merged$Value_V_per_m - df_merged$Schwellenwert_MR_Vm
 
@@ -201,13 +206,11 @@ transform <- function(full_load = TRUE){
     dplyr::group_by(Jahr, Messort_Code, Kategorie) %>% # Groupiere und berechne den rolling mean im naechsten Schritt pro Gruppe
     dplyr::mutate(sixmin_avg = zoo::rollapply(value_grouped, rolling_mean_breite ,mean,align=type_rolling_mean,fill=NA))
 
-
   # Bilde Mittelwerte
   df_grouped_max <- df_grouped_rolling %>%
     dplyr::rename('Service' = "Kategorie") %>%
     dplyr::group_by(Jahr, Messort_Code, Service) %>%
     dplyr::summarise(Wert = max(sixmin_avg, na.rm = TRUE), .groups = "drop")
-
 
   # Joine Information fuer finales Dataframe
   df_final <- merge(df_grouped_max, df_messorte[c('Messort_Code', 'Messort_Name', 'Messintervall')], by.x = 'Messort_Code', by.y = 'Messort_Code') %>%
