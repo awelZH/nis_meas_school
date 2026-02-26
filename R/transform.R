@@ -68,8 +68,8 @@ transform <- function(full_load = TRUE){
   if(file.exists(path_schwellenwerte)){
     df_schwellenwerte <- readr::read_csv(
       path_schwellenwerte,
-      col_types = cols(gueltig_von = col_date(format = "%Y-%m-%d"),
-                       gueltig_bis = col_date(format = "%Y-%m-%d")
+      col_types = cols(gueltig_von = col_date(format = "%d.%m.%Y"),
+                       gueltig_bis = col_date(format = "%d.%m.%Y")
                        ),
       show_col_types = FALSE
       ) # Lade Schwellenwerte File
@@ -77,6 +77,18 @@ transform <- function(full_load = TRUE){
     cli::cli_abort("Schwellenwerte File nicht verfuegbar oder der Zugriff auf das File ist nicht moeglich")
   }
 
+  # if(file.exists(path_schwellenwerte)){
+  #   df_schwellenwerte <- readr::read_csv(
+  #     path_schwellenwerte,
+  #     col_types = cols(gueltig_von = col_date(format = "%Y-%m-%d"),
+  #                      gueltig_bis = col_date(format = "%Y-%m-%d")
+  #     ),
+  #     show_col_types = FALSE
+  #   ) # Lade Schwellenwerte File
+  # }else{
+  #   cli::cli_abort("Schwellenwerte File nicht verfuegbar oder der Zugriff auf das File ist nicht moeglich")
+  # }
+  #
   ##---------------------------------------------------------------------------
   # 1. Lade benoetigte Daten und erstelle Zip OGD File
   ##---------------------------------------------------------------------------

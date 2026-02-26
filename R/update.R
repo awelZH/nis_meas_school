@@ -16,14 +16,12 @@ update <- function(){
   ##---------------------------------------------------------------------------
   cli::cli_alert_info("Starte Update Prozess")
 
-  testmode <- TRUE # boolean, testmode = FALSE bedeutet, dass die Files auf das Produktive MDV geladen werden
   ressourcen_id_aufbereitete_daten <- 4983L # ID der Rohdaten Ressourcen im MDV
   ressourcen_id_rohdaten <- 5003L # ID der Aufbereitete Daten Ressourcen im MDV
   path_rohdaten_messwerte <- "inst/extdata/temp/load/rohdaten_messwerte.zip" # Datenpfad (lokal) als String zum Rohdaten Zip File
   path_aufbereitetem_file <- "inst/extdata/temp/load/aufbereitete_messwerte.csv" # Datenpfad (lokal) als String zum Aufbereiteten CSV File
 
   # ueberpruefe, ob die Argumente der Funktion sind im richtigen Datenformat. Ansonsten breche ab und werfe Fehlermeldung
-  assertthat::assert_that(msg = "testmode` must be a boolean" , is.logical(testmode))
   assertthat::assert_that(msg = "ressourcen_id_aufbereitete_daten` must be integer" , is.integer(ressourcen_id_aufbereitete_daten))
   assertthat::assert_that(msg = "ressourcen_id_rohdaten` must be integer" , is.integer(ressourcen_id_rohdaten))
   assertthat::assert_that(msg = "path_rohdaten_messwerte` must be a character." , is.character(path_rohdaten_messwerte))
@@ -77,7 +75,7 @@ update <- function(){
                               status = 3, # ACHTUNG: Um direkt zu publizieren, muss status=3 gesetzt werden
                               license_id = 2,
                               use_dev = FALSE)
-                              # api_key = "xxx"
+                              # api_key = "xxx")
 
   cli::cli_alert_success("Update Skript ist erfolgreich durchgelaufen")
 
